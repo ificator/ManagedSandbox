@@ -159,6 +159,110 @@ namespace ManagedSandbox.Native
         CREATE_PRESERVE_CODE_AUTHZ_LEVEL    = 0x02000000,
     }
 
+
+    [Flags]
+    public enum DESKTOP_RIGHTS : UInt32
+    {
+        NONE                        = 0x00000000,
+
+        /// <summary>
+        /// Required to read objects on the desktop.
+        /// </summary>
+        DESKTOP_READOBJECTS         = 0x00000001,
+
+        /// <summary>
+        /// Required to create a window on the desktop.
+        /// </summary>
+        DESKTOP_CREATEWINDOW        = 0x00000002,
+
+        /// <summary>
+        /// Required to create a menu on the desktop.
+        /// </summary>
+        DESKTOP_CREATEMENU          = 0x00000004,
+
+        /// <summary>
+        /// Required to establish any of the window hooks.
+        /// </summary>
+        DESKTOP_HOOKCONTROL         = 0x00000008,
+
+        /// <summary>
+        /// Required to perform journal recording on a desktop.
+        /// </summary>
+        DESKTOP_JOURNALRECORD       = 0x00000010,
+
+        /// <summary>
+        /// Required to perform journal playback on a desktop.
+        /// </summary>
+        DESKTOP_JOURNALPLAYBACK     = 0x00000020,
+
+        /// <summary>
+        /// Required for the desktop to be enumerated.
+        /// </summary>
+        DESKTOP_ENUMERATE           = 0x00000040,
+
+        /// <summary>
+        /// Required to write objects on the desktop.
+        /// </summary>
+        DESKTOP_WRITEOBJECTS        = 0x00000080,
+
+        /// <summary>
+        /// Required to activate the desktop using the SwitchDesktop functio
+        /// </summary>
+        DESKTOP_SWITCHDESKTOP       = 0x00000100,
+
+        DESKTOP_ALL_ACCESS          = DESKTOP_READOBJECTS |
+                                      DESKTOP_CREATEWINDOW |
+                                      DESKTOP_CREATEMENU |
+                                      DESKTOP_HOOKCONTROL |
+                                      DESKTOP_JOURNALRECORD |
+                                      DESKTOP_JOURNALPLAYBACK |
+                                      DESKTOP_ENUMERATE |
+                                      DESKTOP_WRITEOBJECTS |
+                                      DESKTOP_SWITCHDESKTOP,
+
+        STANDARD_DELETE             = 0x00010000,
+        STANDARD_READPERMISSIONS    = 0x00020000,
+        STANDARD_WRITEPERMISSIONS   = 0x00040000,
+        STANDARD_TAKEOWNERSHIP      = 0x00080000,
+        STANDARD_SYNCHRONIZE        = 0x00100000,
+
+        STANDARD_RIGHTS_ALL         = STANDARD_DELETE |
+                                      STANDARD_READPERMISSIONS |
+                                      STANDARD_SYNCHRONIZE |
+                                      STANDARD_TAKEOWNERSHIP |
+                                      STANDARD_WRITEPERMISSIONS,
+        STANDARD_RIGHTS_EXECUTE     = STANDARD_READPERMISSIONS,
+        STANDARD_RIGHTS_READ        = STANDARD_READPERMISSIONS,
+        STANDARD_RIGHTS_REQUIRED    = STANDARD_DELETE |
+                                      STANDARD_READPERMISSIONS |
+                                      STANDARD_TAKEOWNERSHIP |
+                                      STANDARD_WRITEPERMISSIONS,
+        STANDARD_RIGHTS_WRITE       = STANDARD_READPERMISSIONS,
+
+        GENERIC_READ                = DESKTOP_ENUMERATE |
+                                      DESKTOP_READOBJECTS |
+                                      STANDARD_RIGHTS_READ,
+        GENERIC_WRITE               = DESKTOP_CREATEMENU |
+                                      DESKTOP_CREATEWINDOW |
+                                      DESKTOP_HOOKCONTROL |
+                                      DESKTOP_JOURNALPLAYBACK |
+                                      DESKTOP_JOURNALRECORD |
+                                      DESKTOP_WRITEOBJECTS |
+                                      STANDARD_RIGHTS_WRITE,
+        GENERIC_EXECUTE             = DESKTOP_SWITCHDESKTOP |
+                                      STANDARD_RIGHTS_EXECUTE,
+        GENERIC_ALL                 = DESKTOP_CREATEMENU |
+                                      DESKTOP_CREATEWINDOW |
+                                      DESKTOP_ENUMERATE |
+                                      DESKTOP_HOOKCONTROL |
+                                      DESKTOP_JOURNALPLAYBACK |
+                                      DESKTOP_JOURNALRECORD |
+                                      DESKTOP_READOBJECTS |
+                                      DESKTOP_SWITCHDESKTOP |
+                                      DESKTOP_WRITEOBJECTS |
+                                      STANDARD_RIGHTS_REQUIRED,
+    }
+
     public enum Error : UInt32
     {
         OK                  = 0x00000000,

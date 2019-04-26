@@ -42,8 +42,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppContainer\AppContainerProfile.cs" />
+    <Compile Include="Desktop\Desktop.cs" />
+    <Compile Include="Desktop\DesktopProtection.cs" />
     <Compile Include="IProtection.cs" />
     <Compile Include="JobObject\JobObject.cs" />
+    <Compile Include="JobObject\JobObjectProtection.cs" />
+    <Compile Include="Desktop\WindowObject.cs" />
+    <Compile Include="Desktop\WindowStation.cs" />
     <Compile Include="Native\Classes.cs" />
     <Compile Include="Native\Enums.cs" />
     <Compile Include="Native\Methods.cs" />
@@ -56,7 +61,6 @@
     <Compile Include="SandboxException.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Desktop\" />
     <Folder Include="RestrictedToken\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -50,6 +50,22 @@ namespace ManagedSandbox.Native
         public static extern bool AssignProcessToJobObject(IntPtr hJob, IntPtr hProcess);
 
         /// <summary>
+        /// Closes an open handle to a desktop object.
+        /// </summary>
+        /// <param name="handle">
+        /// A handle to the desktop to be closed. This can be a handle returned by the CreateDesktop, OpenDesktop, or OpenInputDesktop
+        /// functions. Do not specify the handle returned by the GetThreadDesktop function.
+        /// </param>
+        /// <returns>
+        /// If the function succeeds, the return value is nonzero.
+        /// 
+        /// If the function fails, the return value is zero. To get extended error information, call GetLastError.
+        /// </returns>
+        [DllImport("user32.dll", EntryPoint = "CloseDesktop", CharSet = CharSet.Unicode, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool CloseDesktop(IntPtr handle);
+
+        /// <summary>
         /// Closes an open object handle.
         /// </summary>
         /// <param name="handle">A valid handle to an open object.</param>
@@ -61,6 +77,22 @@ namespace ManagedSandbox.Native
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool CloseHandle(IntPtr handle);
+
+        /// <summary>
+        /// Closes an open window station handle.
+        /// </summary>
+        /// <param name="hWinsta">
+        /// A handle to the window station to be closed. This handle is returned by the CreateWindowStation or OpenWindowStation
+        /// function. Do not specify the handle returned by the GetProcessWindowStation function.
+        /// </param>
+        /// <returns>
+        /// If the function succeeds, the return value is nonzero.
+        /// 
+        /// If the function fails, the return value is zero. To get extended error information, call GetLastError.
+        /// </returns>
+        [DllImport("user32", CharSet = CharSet.Unicode, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool CloseWindowStation(IntPtr hWinsta);
 
         /// <summary>
         /// Creates a per-user, per-app profile for Windows Store apps.
@@ -101,6 +133,44 @@ namespace ManagedSandbox.Native
             SID_AND_ATTRIBUTES[] pCapabilities,
             UInt32 dwCapabilityCount,
             out SafeSecurityIdentifier ppSidAppContainerSid);
+
+        /// <summary>
+        /// Creates a new desktop, associates it with the current window station of the calling process, and assigns it to the calling
+        /// thread. The calling process must have an associated window station, either assigned by the system at process creation time
+        /// or set by the SetProcessWindowStation function.
+        /// </summary>
+        /// <param name="desktopName">
+        /// The name of the desktop to be created. Desktop names are case-insensitive and may not contain backslash characters (\).
+        /// </param>
+        /// <param name="device">
+        /// Reserved; must be NULL.
+        /// </param>
+        /// <param name="deviceMode">
+        /// Reserved; must be NULL.
+        /// </param>
+        /// <param name="flags">
+        /// Must be 0.
+        /// </param>
+        /// <param name="accessMask">
+        /// The access to the desktop. For a list of values, see Desktop Security and Access Rights.
+        /// </param>
+        /// <param name="attributes">
+        /// A pointer to a SECURITY_ATTRIBUTES structure that determines whether the returned handle can be inherited by child
+        /// processes. If lpsa is NULL, the handle cannot be inherited.
+        /// </param>
+        /// <returns>
+        /// If the function succeeds, the return value is a handle to the newly created desktop. If the specified desktop already
+        /// exists, the function succeeds and returns a handle to the existing desktop. When you are finished using the handle, call
+        /// the CloseDesktop function to close it.
+        /// </returns>
+        [DllImport("user32.dll", EntryPoint = "CreateDesktop", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern IntPtr CreateDesktop(
+            [MarshalAs(UnmanagedType.LPWStr)] string desktopName,
+            [MarshalAs(UnmanagedType.LPWStr)] string device,
+            [MarshalAs(UnmanagedType.LPWStr)] string deviceMode,
+            [MarshalAs(UnmanagedType.U4)] int flags,
+            [MarshalAs(UnmanagedType.U4)] DESKTOP_RIGHTS accessMask,
+            [MarshalAs(UnmanagedType.LPStruct)] SECURITY_ATTRIBUTES attributes);
 
         /// <summary>
         /// Creates or opens a job object.
@@ -191,6 +261,50 @@ namespace ManagedSandbox.Native
             out PROCESS_INFORMATION processInformation);
 
         /// <summary>
+        /// Retrieves a handle to the current window station for the calling process.
+        /// </summary>
+        /// <returns>
+        /// If the function succeeds, the return value is a handle to the window station.
+        /// </returns>
+        [DllImport("user32", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern IntPtr GetProcessWindowStation();
+
+        /// <summary>
+        /// Retrieves information about the specified window station or desktop object.
+        /// </summary>
+        /// <param name="hObj">
+        /// A handle to the window station or desktop object. This handle is returned by the CreateWindowStation, OpenWindowStation,
+        /// CreateDesktop, or OpenDesktop function.
+        /// </param>
+        /// <param name="nIndex">
+        /// The information to be retrieved.
+        /// </param>
+        /// <param name="pvInfo">
+        /// A pointer to a buffer to receive the object information.
+        /// </param>
+        /// <param name="nLength">
+        /// The size of the buffer pointed to by the pvInfo parameter, in bytes.
+        /// </param>
+        /// <param name="lpnLengthNeeded">
+        /// A pointer to a variable receiving the number of bytes required to store the requested information. If this variable's value
+        /// is greater than the value of the nLength parameter when the function returns, the function returns FALSE, and none of the
+        /// information is copied to the pvInfo buffer. If the value of the variable pointed to by lpnLengthNeeded is less than or
+        /// equal to the value of nLength, the entire information block is copied.
+        /// </param>
+        /// <returns>
+        /// If the function succeeds, the return value is nonzero.
+        /// 
+        /// If the function fails, the return value is zero. To get extended error information, call GetLastError.
+        /// </returns>
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool GetUserObjectInformation(
+            IntPtr hObj,
+            int nIndex,
+            IntPtr pvInfo,
+            uint nLength,
+            out uint lpnLengthNeeded);
+
+        /// <summary>
         /// Gets the SID of the specified profile.
         /// </summary>
         /// <param name="appContainerName">
@@ -220,6 +334,28 @@ namespace ManagedSandbox.Native
         /// </returns>
         [DllImport("advapi32.dll")]
         public static extern IntPtr FreeSid(IntPtr pSid);
+
+        /// <summary>
+        /// Retrieves the thread identifier of the calling thread.
+        /// </summary>
+        /// <returns>
+        /// The return value is the thread identifier of the calling thread.
+        /// </returns>
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern int GetCurrentThreadId();
+
+        /// <summary>
+        /// Retrieves a handle to the desktop assigned to the specified thread.
+        /// </summary>
+        /// <param name="dwThreadId">
+        /// The thread identifier. The GetCurrentThreadId and CreateProcess functions return thread identifiers.
+        /// </param>
+        /// <returns>
+        /// If the function succeeds, the return value is a handle to the desktop associated with the specified thread. You do not need
+        /// to call the CloseDesktop function to close the returned handle.
+        /// </returns>
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr GetThreadDesktop(int dwThreadId);
 
         /// <summary>
         /// Initializes the specified list of attributes for process and thread creation.
@@ -297,6 +433,22 @@ namespace ManagedSandbox.Native
             JOB_OBJECT_INFO_CLASS JobObjectInfoClass,
             IntPtr lpJobObjectInfo,
             Int32 cbJobObjectInfoLength);
+
+        /// <summary>
+        /// Assigns the specified desktop to the calling thread. All subsequent operations on the desktop use the access rights granted
+        /// to the desktop.
+        /// </summary>
+        /// <param name="hDesktop">
+        /// A handle to the desktop to be assigned to the calling thread. This handle is returned by the CreateDesktop,
+        /// GetThreadDesktop, OpenDesktop, or OpenInputDesktop function.
+        /// </param>
+        /// <returns>
+        /// If the function succeeds, the return value is the thread's previous suspend count.
+        /// 
+        /// If the function fails, the return value is (DWORD) -1. To get extended error information, call GetLastError.
+        /// </returns>
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool SetThreadDesktop(IntPtr hDesktop);
 
         /// <summary>
         /// Updates the specified attribute in a list of attributes for process and thread creation.

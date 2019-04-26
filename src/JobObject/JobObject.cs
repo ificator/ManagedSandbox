@@ -92,8 +92,8 @@ namespace ManagedSandbox.JobObject
         /// </summary>
         /// <param name="activeProcessLimit">The number of processes that can be added to the job object.</param>
         /// <param name="jobMemoryLimitInBytes">The total amount of memory that can be consumed by all processes in the job object.</param>
-        /// <param name="limitFlags"></param>
-        /// <param name="processMemoryLimitInBytes"></param>
+        /// <param name="limitFlags">The limits that are in effect.</param>
+        /// <param name="processMemoryLimitInBytes">The maximum number of bytes a process can consume.</param>
         public void SetLimits(
             uint? activeProcessLimit = null,
             ulong? jobMemoryLimitInBytes = null,
@@ -145,11 +145,15 @@ namespace ManagedSandbox.JobObject
             }
         }
 
-        public void SetUiRestrictions(JOB_OBJECT_UILIMIT_FLAGS uiLimitFlags = JOB_OBJECT_UILIMIT_FLAGS.ALL)
+        /// <summary>
+        /// Sets UI restrictions.
+        /// </summary>
+        /// <param name="uiRestrictionsClass">The restriction class for the UI.</param>
+        public void SetUiRestrictions(JOB_OBJECT_UILIMIT_FLAGS uiRestrictionsClass = JOB_OBJECT_UILIMIT_FLAGS.ALL)
         {
             var uiRestrictions = new JOBOBJECT_BASIC_UI_RESTRICTIONS
             {
-                UIRestrictionsClass = uiLimitFlags,
+                UIRestrictionsClass = uiRestrictionsClass,
             };
 
             using (var nativeUiRestrictions = new SafeHGlobalBuffer(Marshal.SizeOf(typeof(JOBOBJECT_BASIC_UI_RESTRICTIONS))))
@@ -183,7 +187,7 @@ namespace ManagedSandbox.JobObject
             bool handleClosed = Methods.CloseHandle(this.handle);
             if (handleClosed)
             {
-                this.SetHandle(IntPtr.Zero);
+                this.SetHandleAsInvalid();
             }
 
             return handleClosed;
