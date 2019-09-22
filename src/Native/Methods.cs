@@ -125,7 +125,7 @@ namespace ManagedSandbox.Native
         ///                             strings exceed their specified respective limits for length.
         /// </returns>
         [DllImport("userenv.dll")]
-        public static extern UInt32 CreateAppContainerProfile(
+        public static extern HResult CreateAppContainerProfile(
             string pszAppContainerName,
             string pszDisplayName,
             string pszDescription,
@@ -261,6 +261,57 @@ namespace ManagedSandbox.Native
             out PROCESS_INFORMATION processInformation);
 
         /// <summary>
+        /// Creates a SID for predefined aliases.
+        /// </summary>
+        /// <param name="wellKnownSidType">
+        /// Member of the WELL_KNOWN_SID_TYPE enumeration that specifies what the SID will identify.
+        /// </param>
+        /// <param name="domainSid">
+        /// A pointer to a SID that identifies the domain to use when creating the SID. Pass NULL to use the local computer.
+        /// </param>
+        /// <param name="pSid">
+        /// A pointer to memory where CreateWellKnownSid will store the new SID.
+        /// </param>
+        /// <param name="cbSid">
+        /// A pointer to a DWORD that contains the number of bytes available at pSid. The CreateWellKnownSid function stores
+        /// the number of bytes actually used at this location.
+        /// </param>
+        /// <returns></returns>
+        [DllImport("advapi32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool CreateWellKnownSid(
+            WELL_KNOWN_SID_TYPE wellKnownSidType,
+            IntPtr domainSid,
+            SafeHGlobalBuffer pSid,
+            ref Int32 cbSid);
+
+        /// <summary>
+        /// Deletes the specified per-user, per-app profile.
+        /// </summary>
+        /// <param name="pszAppContainerName">
+        /// he name given to the profile in the call to the CreateAppContainerProfile function. This string is at most 64 characters
+        /// in length, and fits into the pattern described by the regular expression "[-_. A-Za-z0-9]+".
+        /// </param>
+        /// <returns>
+        /// HResult.OK                  The profile was deleted successfully.
+        /// HResult.InvalidParameter    The pszAppContainerName parameter is either NULL or not valid.
+        /// </returns>
+        [DllImport("userenv.dll")]
+        public static extern HResult DeleteAppContainerProfile(string pszAppContainerName);
+
+        /// <summary>
+        /// Gets the path of the local app data folder for the specified app container.
+        /// </summary>
+        /// <param name="pszAppContainerSid">The SID of the app container (in string form).</param>
+        /// <param name="ppszPath">The path of the local folder.</param>
+        /// <returns>
+        /// HResult.OK                  The profile was deleted successfully.
+        /// HResult.InvalidParameter    The pszAppContainerName parameter is either NULL or not valid.
+        /// </returns>
+        [DllImport("userenv.dll")]
+        public static extern HResult GetAppContainerFolderPath(string pszAppContainerSid, out string ppszPath);
+
+        /// <summary>
         /// Retrieves a handle to the current window station for the calling process.
         /// </summary>
         /// <returns>
@@ -318,7 +369,7 @@ namespace ManagedSandbox.Native
         /// HResult.InvalidParameter    The appContainerName parameter is either NULL or not valid.
         /// </returns>
         [DllImport("userenv.dll")]
-        public static extern UInt32 DeriveAppContainerSidFromAppContainerName(
+        public static extern HResult DeriveAppContainerSidFromAppContainerName(
             string appContainerName,
             out SafeSecurityIdentifier pSid);
 
@@ -486,7 +537,7 @@ namespace ManagedSandbox.Native
         public static extern bool UpdateProcThreadAttribute(
              IntPtr lpAttributeList,
              uint dwFlags,
-             UInt32 attribute,
+             PROC_THREAD_ATTRIBUTES attribute,
              IntPtr lpValue,
              Int32 cbSize,
              IntPtr lpPreviousValue,

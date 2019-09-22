@@ -33,15 +33,16 @@ namespace ManagedSandbox.Native
     /// </summary>
     public sealed class SafeSecurityIdentifier : SafeHandleZeroOrMinusOneIsInvalid
     {
-        public SafeSecurityIdentifier(IntPtr securityIndentifier)
-            : base(true /* ownsHandle */)
+        public SafeSecurityIdentifier(IntPtr securityIndentifier, bool ownsHandle = true)
+            : base(ownsHandle)
         {
-            this.SetHandle(this.handle);
+            this.SetHandle(securityIndentifier);
         }
 
         private SafeSecurityIdentifier()
-            : base(true /* ownsHandle */)
+            : base(ownsHandle: true)
         {
+            // BUGBUG: Throw exception and see if this is used.
         }
 
         protected override bool ReleaseHandle()

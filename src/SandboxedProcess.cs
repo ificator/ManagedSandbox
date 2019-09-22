@@ -23,11 +23,13 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Security.Principal;
-
 using ManagedSandbox.Native;
+using ManagedSandbox.Tracing;
 
 namespace ManagedSandbox
 {
@@ -36,26 +38,16 @@ namespace ManagedSandbox
     /// </summary>
     public sealed class SandboxedProcess : IDisposable
     {
-        private readonly IProtection[] protections = null;
-        private readonly ProcessStartInfo startInfo = null;
+        private readonly IEnumerable<IProtection> protections = null;
+        private readonly ITracer tracer = null;
 
         private bool disposed = false;
         private Process process = null;
 
-        public SandboxedProcess(ProcessStartInfo startInfo, params IProtection[] protections)
+        public SandboxedProcess(IEnumerable<IProtection> protections, ITracer tracer)
         {
-            this.protections = protections ?? new IProtection[0];
-            this.startInfo = startInfo ?? throw new ArgumentNullException(nameof(startInfo));
-
-            if (string.IsNullOrEmpty(this.startInfo.FileName))
-            {
-                throw new ArgumentException(nameof(startInfo.FileName) + " must be specified.");
-            }
-        }
-
-        ~SandboxedProcess()
-        {
-            this.Dispose(disposing: false);
+            this.protections = protections ?? throw new ArgumentNullException(nameof(protections));
+            this.tracer = tracer ?? throw new ArgumentNullException(nameof(tracer));
         }
 
         /// <summary>
@@ -71,64 +63,27 @@ namespace ManagedSandbox
         }
 
         /// <summary>
-        /// Starts a sandboxed process by specifying the name of a file and the protections to use, and returning a new
-        /// <see cref="SandboxedProcess"/>.
-        /// </summary>
-        /// <param name="fileName">The full path to the file to execute.</param>
-        /// <param name="protections">The protections to utilize while creating the process.</param>
-        /// <returns>A <see cref="SandboxedProcess"/> instance.</returns>
-        public static SandboxedProcess Start(string fileName, params IProtection[] protections)
-        {
-            return SandboxedProcess.Start(
-                new ProcessStartInfo
-                {
-                    FileName = fileName,
-                },
-                protections);
-        }
-
-        /// <summary>
-        /// Starts a sandboxed process by specifying the name of a file, the arguments, and the protections to use, and
-        /// returning a new <see cref="SandboxedProcess"/>.
-        /// </summary>
-        /// <param name="fileName">The full path to the file to execute.</param>
-        /// <param name="arguments">The arguments to use when executing the file.</param>
-        /// <param name="protections">The protections to utilize while creating the process.</param>
-        /// <returns>A <see cref="SandboxedProcess"/> instance.</returns>
-        public static SandboxedProcess Start(string fileName, string arguments, params IProtection[] protections)
-        {
-            return SandboxedProcess.Start(
-                new ProcessStartInfo
-                {
-                    Arguments = arguments,
-                    FileName = fileName,
-                },
-                protections);
-        }
-
-        /// <summary>
-        /// Starts a sandboxed process by specifying the start info and the protections to use, and returning a new
-        /// <see cref="SandboxedProcess"/>.
-        /// </summary>
-        /// <param name="startInfo">The <see cref="ProcessStartInfo"/> to use to execute.</param>
-        /// <param name="protections">The protections to utilize while creating the process.</param>
-        /// <returns>A <see cref="SandboxedProcess"/> instance.</returns>
-        public static SandboxedProcess Start(ProcessStartInfo startInfo, params IProtection[] protections)
-        {
-            var sandboxedProcess = new SandboxedProcess(startInfo, protections);
-            sandboxedProcess.Start();
-            return sandboxedProcess;
-        }
-
-        /// <summary>
         /// Starts the sandboxed process.
         /// </summary>
-        public void Start()
+        public void Start(ProcessStartInfo processStartInfo)
         {
+            if (processStartInfo == null)
+            {
+                throw new ArgumentNullException(nameof(processStartInfo));
+            }
+
+            this.tracer.Trace(
+                nameof(SandboxedProcess),
+                "Starting process '{0}' (arguments '{1}') with protections {2}",
+                processStartInfo.FileName,
+                processStartInfo.Arguments,
+                string.Join(" ", this.protections.Select(x => x.GetType().Name)));
+
             using (WindowsIdentity currentIdentity = WindowsIdentity.GetCurrent())
             using (SafeTokenHandle currentToken = new SafeTokenHandle(currentIdentity.Token, ownsHandle: false))
             {
                 // Start with the current process' token, and then allow the protections to mutate it as required.
+                this.tracer.Trace(nameof(SandboxedProcess), "Modifying current process token");
                 SafeTokenHandle processToken = currentToken;
                 foreach (IProtection protection in this.protections)
                 {
@@ -141,12 +96,18 @@ namespace ManagedSandbox
                 CREATE_PROCESS_FLAGS createProcessFlags = CREATE_PROCESS_FLAGS.NONE;
 
                 // Now allow the protections to change the startup information as required.
+                this.tracer.Trace(
+                    nameof(SandboxedProcess),
+                    "Modifying startup info");
                 foreach (IProtection protection in this.protections)
                 {
                     protection.ModifyStartup(ref startupInfo, ref createProcessFlags);
                 }
 
-                string quotedFileName = this.startInfo.FileName;
+                // Make sure extended startupinfo flag is set.
+                createProcessFlags |= CREATE_PROCESS_FLAGS.EXTENDED_STARTUPINFO_PRESENT;
+
+                string quotedFileName = processStartInfo.FileName;
                 if (quotedFileName[0] != '"')
                 {
                     quotedFileName = "\"" + quotedFileName + "\"";
@@ -157,10 +118,11 @@ namespace ManagedSandbox
 
                 try
                 {
+                    this.tracer.Trace(nameof(SandboxedProcess), "Creating sandboxed process");
                     if (!Methods.CreateProcessAsUser(
                             processToken,
                             applicationName: null,
-                            commandLine: quotedFileName + " " + this.startInfo.Arguments,
+                            commandLine: quotedFileName + " " + processStartInfo.Arguments,
                             pProcessAttributes: null,
                             pThreadAttributes: null,
                             bInheritHandles: false,
@@ -179,12 +141,14 @@ namespace ManagedSandbox
                     this.process = Process.GetProcessById(processInfo.dwProcessId);
 
                     // Let the protections modify the process now that it has been created.
+                    this.tracer.Trace(nameof(SandboxedProcess), "Modifying sandboxed process");
                     foreach (IProtection protection in this.protections)
                     {
                         protection.ModifyProcess(this.process);
                     }
 
                     // Resume the process.
+                    this.tracer.Trace(nameof(SandboxedProcess), "Resuming sandboxed process");
                     Methods.ResumeThread(processInfo.hThread);
                 }
                 finally

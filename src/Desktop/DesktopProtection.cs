@@ -49,11 +49,11 @@ namespace ManagedSandbox.Desktop
         {
         }
 
-        public void ModifyStartup(ref STARTUPINFOEX startupInfo, ref CREATE_PROCESS_FLAGS createProcessFlags)
+        public void ModifyStartup(ref STARTUPINFOEX startupInfoEx, ref CREATE_PROCESS_FLAGS createProcessFlags)
         {
             using (var windowStation = WindowStation.GetCurrent())
             {
-                startupInfo.StartupInfo.lpDesktop = windowStation.Name + "\\" + this.Desktop.Name;
+                startupInfoEx.StartupInfo.lpDesktop = windowStation.Name + "\\" + this.Desktop.Name;
             }
         }
 

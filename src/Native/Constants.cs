@@ -22,40 +22,12 @@
  * SOFTWARE.
  */
 
-using System.Diagnostics;
+using System;
 
-using ManagedSandbox.Native;
-
-namespace ManagedSandbox.JobObject
+namespace ManagedSandbox.Native
 {
-    public class JobObjectProtection : IProtection
+    public static class Constants
     {
-        public JobObjectProtection()
-        {
-            this.JobObject = JobObject.CreateOrOpenJobObject(jobObjectName: null);
-        }
-
-        /// <summary>
-        /// The <see cref="JobObject"/> instance utilized for this protection.
-        /// </summary>
-        public JobObject JobObject { get; }
-
-        public void Dispose()
-        {
-            this.JobObject.Dispose();
-        }
-
-        public void ModifyProcess(Process process)
-        {
-            this.JobObject.AssignProcess(process);
-        }
-
-        public void ModifyStartup(ref STARTUPINFOEX startupInfoEx, ref CREATE_PROCESS_FLAGS createProcessFlags)
-        {
-        }
-
-        public void ModifyToken(ref SafeTokenHandle currentToken)
-        {
-        }
+        public const Int32 SECURITY_MAX_SID_SIZE = 68;
     }
 }

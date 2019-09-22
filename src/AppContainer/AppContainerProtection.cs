@@ -22,36 +22,41 @@
  * SOFTWARE.
  */
 
+using System;
 using System.Diagnostics;
-
 using ManagedSandbox.Native;
+using ManagedSandbox.Tracing;
 
-namespace ManagedSandbox.JobObject
+namespace ManagedSandbox.AppContainer
 {
-    public class JobObjectProtection : IProtection
+    public class AppContainerProtection : IDisposable, IProtection
     {
-        public JobObjectProtection()
+        public AppContainerProtection(
+            ITracer tracer,
+            string appContainerName,
+            string displayName = null,
+            string description = null)
         {
-            this.JobObject = JobObject.CreateOrOpenJobObject(jobObjectName: null);
+            this.AppContainer = AppContainer.Create(tracer, appContainerName, displayName, description);
         }
 
         /// <summary>
-        /// The <see cref="JobObject"/> instance utilized for this protection.
+        /// The <see cref="AppContainer"/> instance utilized for this protection.
         /// </summary>
-        public JobObject JobObject { get; }
+        public AppContainer AppContainer { get; }
 
         public void Dispose()
         {
-            this.JobObject.Dispose();
+            this.AppContainer.Dispose();
         }
 
         public void ModifyProcess(Process process)
         {
-            this.JobObject.AssignProcess(process);
         }
 
         public void ModifyStartup(ref STARTUPINFOEX startupInfoEx, ref CREATE_PROCESS_FLAGS createProcessFlags)
         {
+            this.AppContainer.SetAttributeList(ref startupInfoEx);
         }
 
         public void ModifyToken(ref SafeTokenHandle currentToken)

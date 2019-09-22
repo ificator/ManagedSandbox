@@ -40,9 +40,9 @@ namespace ManagedSandbox
         /// <summary>
         /// Modifies the startup parameters.
         /// </summary>
-        /// <param name="startupInfo">The STARTUPINFOEX to modify.</param>
+        /// <param name="startupInfoEx">The STARTUPINFOEX to modify.</param>
         /// <param name="createProcessFlags">The CREATE_PROCESS_FLAGS to modify.</param>
-        void ModifyStartup(ref STARTUPINFOEX startupInfo, ref CREATE_PROCESS_FLAGS createProcessFlags);
+        void ModifyStartup(ref STARTUPINFOEX startupInfoEx, ref CREATE_PROCESS_FLAGS createProcessFlags);
 
         /// <summary>
         /// Modifies the token used to launch the process. If a different token is modified it is up to the implementer

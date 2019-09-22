@@ -22,9 +22,28 @@
  * SOFTWARE.
  */
 
-namespace ManagedSandbox.AppContainer
+using System;
+using System.IO;
+
+namespace ManagedSandbox.Tracing
 {
-    public class AppContainerProfile
+    public class FileTracer : IDisposable, ITracer
     {
+        private readonly TextWriter textWriter;
+
+        public FileTracer(string fileName)
+        {
+            this.textWriter = new StreamWriter(File.OpenWrite(fileName));
+        }
+
+        public void Dispose()
+        {
+            this.textWriter.Dispose();
+        }
+
+        public void Trace(string component, string messageFormat, params object[] args)
+        {
+            this.textWriter.WriteLine(string.Format("[" + component + "] " + messageFormat, args));
+        }
     }
 }

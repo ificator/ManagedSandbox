@@ -23,11 +23,9 @@
  */
 
 using System;
-using System.Collections.Generic;
-
+using System.Diagnostics;
 using ManagedSandbox;
-using ManagedSandbox.Desktop;
-using ManagedSandbox.JobObject;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ManagedSandboxTest
 {
@@ -35,31 +33,56 @@ namespace ManagedSandboxTest
     {
         public static void Main(string[] args)
         {
-            var parameters = new Parameters(args);
-
-            if (parameters.InSandbox)
+            try
             {
-                Console.WriteLine("In Sandbox! Check process in ProcessExplorer, then press any key to terminate...");
-                Console.ReadKey();
+                var parameters = new Parameters(args);
+
+                if (parameters.InSandbox)
+                {
+                    Console.WriteLine("In Sandbox! Check process in ProcessExplorer, then press any key to terminate...");
+                    Console.ReadKey();
+                }
+                else
+                {
+                    Console.WriteLine("In Host! Launching sandbox with args '{0}'", string.Join(" ", args));
+
+                    var services = new ServiceCollection();
+                    services.AddManagedSandbox();
+                    services.AddConsoleTracer();
+
+                    if (parameters.AppContainer)
+                    {
+                        services.AddAppContainerProtection("SboxTest");
+                    }
+
+                    if (parameters.Desktop)
+                    {
+                        services.AddDesktopProtection();
+                    }
+
+                    if (parameters.JobObject)
+                    {
+                        services.AddJobObjectProtection();
+                    }
+
+                    using (var serviceProvider = services.BuildServiceProvider())
+                    {
+                        var sandboxedProcess = serviceProvider.GetService<SandboxedProcess>();
+                        sandboxedProcess.Start(
+                            new ProcessStartInfo
+                            {
+                                Arguments = "-insandbox",
+                                FileName = Environment.GetCommandLineArgs()[0],
+                            });
+                        sandboxedProcess.Process.WaitForExit();
+                    }
+                }
             }
-            else
+            catch (Exception ex)
             {
-                var protections = new List<IProtection>();
-                if (parameters.Desktop)
-                {
-                    protections.Add(new DesktopProtection());
-                }
-
-                if (parameters.JobObject)
-                {
-                    protections.Add(new JobObjectProtection());
-                }
-
-                var sandboxedProcess = SandboxedProcess.Start(
-                    Environment.GetCommandLineArgs()[0],
-                    "-insandbox",
-                    protections.ToArray());
-                sandboxedProcess.Process.WaitForExit();
+                Console.WriteLine($"Exception: {ex.GetType().Name}");
+                Console.WriteLine($"{ex.Message}");
+                Console.WriteLine($"{ex.StackTrace}");
             }
         }
 

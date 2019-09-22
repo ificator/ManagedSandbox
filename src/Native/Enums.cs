@@ -159,7 +159,6 @@ namespace ManagedSandbox.Native
         CREATE_PRESERVE_CODE_AUTHZ_LEVEL    = 0x02000000,
     }
 
-
     [Flags]
     public enum DESKTOP_RIGHTS : UInt32
     {
@@ -275,12 +274,12 @@ namespace ManagedSandbox.Native
     public enum HResult : UInt32
     {
         OK                  = 0x00000000,
-        AccessDenied        = Mask | Error.AccessDenied,
-        InvalidParameter    = Mask | Error.InvalidParameter,
-        InsufficientBuffer  = Mask | Error.InsufficientBuffer,
-        AlreadyExists       = Mask | Error.AlreadyExists,
+        AccessDenied        = 0x80070005,
+        InvalidParameter    = 0x80070057,
+        InsufficientBuffer  = 0x8007007A,
+        AlreadyExists       = 0x800700B7,
 
-        Mask                = 0x80070000,
+        Unknown             = 0xFFFFFFFF,
     }
 
     /// <summary>
@@ -527,11 +526,34 @@ namespace ManagedSandbox.Native
         JOB_OBJECT_UILIMIT_EXITWINDOWS      = 0x00000080,
     }
 
-    public enum ProcThreadAttribute : UInt32
+    public enum PROC_THREAD_ATTRIBUTES : UInt32
     {
-        ParentProcess           = 0x00020000,
-        HandleList              = 0x00020002,
-        SecurityCapabilities    = 0x00020009,
+        PROC_THREAD_ATTRIBUTE_PARENT_PROCESS        = 0x00020000,
+        PROC_THREAD_ATTRIBUTE_HANDLE_LIST           = 0x00020002,
+        PROC_THREAD_ATTRIBUTE_SECURITY_CAPABILITIES = 0x00020009,
+    }
+
+    [Flags]
+    public enum SID_ATTRIBUTES : UInt32
+    {
+        SE_GROUP_MANDATORY          = 0x00000001,
+        SE_GROUP_ENABLED_BY_DEFAULT = 0x00000002,
+        SE_GROUP_ENABLED            = 0x00000004,
+        SE_GROUP_OWNER              = 0x00000008,
+        SE_GROUP_USE_FOR_DENY_ONLY  = 0x00000010,
+        SE_GROUP_INTEGRITY          = 0x00000020,
+        SE_GROUP_INTEGRITY_ENABLED  = 0x00000040,
+        SE_GROUP_RESOURCE           = 0x20000000,
+        SE_GROUP_LOGON_ID           = 0xC0000000,
+        SE_GROUP_VALID_ATTRIBUTES   = SE_GROUP_MANDATORY |
+                                      SE_GROUP_ENABLED_BY_DEFAULT |
+                                      SE_GROUP_ENABLED |
+                                      SE_GROUP_OWNER |
+                                      SE_GROUP_USE_FOR_DENY_ONLY |
+                                      SE_GROUP_INTEGRITY |
+                                      SE_GROUP_INTEGRITY_ENABLED |
+                                      SE_GROUP_RESOURCE |
+                                      SE_GROUP_LOGON_ID,
     }
 
     [Flags]
@@ -631,5 +653,113 @@ namespace ManagedSandbox.Native
         /// The command line came from an untrusted source.
         /// </summary>
         STARTF_UNTRUSTEDSOURCE  = 0x00008000,
+    }
+
+    /// <summary>
+    /// Well known SID definitions for lookup.
+    /// </summary>
+    public enum WELL_KNOWN_SID_TYPE
+    {
+        WinNullSid                                  = 0,
+        WinWorldSid                                 = 1,
+        WinLocalSid                                 = 2,
+        WinCreatorOwnerSid                          = 3,
+        WinCreatorGroupSid                          = 4,
+        WinCreatorOwnerServerSid                    = 5,
+        WinCreatorGroupServerSid                    = 6,
+        WinNtAuthoritySid                           = 7,
+        WinDialupSid                                = 8,
+        WinNetworkSid                               = 9,
+        WinBatchSid                                 = 10,
+        WinInteractiveSid                           = 11,
+        WinServiceSid                               = 12,
+        WinAnonymousSid                             = 13,
+        WinProxySid                                 = 14,
+        WinEnterpriseControllersSid                 = 15,
+        WinSelfSid                                  = 16,
+        WinAuthenticatedUserSid                     = 17,
+        WinRestrictedCodeSid                        = 18,
+        WinTerminalServerSid                        = 19,
+        WinRemoteLogonIdSid                         = 20,
+        WinLogonIdsSid                              = 21,
+        WinLocalSystemSid                           = 22,
+        WinLocalServiceSid                          = 23,
+        WinNetworkServiceSid                        = 24,
+        WinBuiltinDomainSid                         = 25,
+        WinBuiltinAdministratorsSid                 = 26,
+        WinBuiltinUsersSid                          = 27,
+        WinBuiltinGuestsSid                         = 28,
+        WinBuiltinPowerUsersSid                     = 29,
+        WinBuiltinAccountOperatorsSid               = 30,
+        WinBuiltinSystemOperatorsSid                = 31,
+        WinBuiltinPrintOperatorsSid                 = 32,
+        WinBuiltinBackupOperatorsSid                = 33,
+        WinBuiltinReplicatorSid                     = 34,
+        WinBuiltinPreWindows2000CompatibleAccessSid = 35,
+        WinBuiltinRemoteDesktopUsersSid             = 36,
+        WinBuiltinNetworkConfigurationOperatorsSid  = 37,
+        WinAccountAdministratorSid                  = 38,
+        WinAccountGuestSid                          = 39,
+        WinAccountKrbtgtSid                         = 40,
+        WinAccountDomainAdminsSid                   = 41,
+        WinAccountDomainUsersSid                    = 42,
+        WinAccountDomainGuestsSid                   = 43,
+        WinAccountComputersSid                      = 44,
+        WinAccountControllersSid                    = 45,
+        WinAccountCertAdminsSid                     = 46,
+        WinAccountSchemaAdminsSid                   = 47,
+        WinAccountEnterpriseAdminsSid               = 48,
+        WinAccountPolicyAdminsSid                   = 49,
+        WinAccountRasAndIasServersSid               = 50,
+        WinNTLMAuthenticationSid                    = 51,
+        WinDigestAuthenticationSid                  = 52,
+        WinSChannelAuthenticationSid                = 53,
+        WinThisOrganizationSid                      = 54,
+        WinOtherOrganizationSid                     = 55,
+        WinBuiltinIncomingForestTrustBuildersSid    = 56,
+        WinBuiltinPerfMonitoringUsersSid            = 57,
+        WinBuiltinPerfLoggingUsersSid               = 58,
+        WinBuiltinAuthorizationAccessSid            = 59,
+        WinBuiltinTerminalServerLicenseServersSid   = 60,
+        WinBuiltinDCOMUsersSid                      = 61,
+        WinBuiltinIUsersSid                         = 62,
+        WinIUserSid                                 = 63,
+        WinBuiltinCryptoOperatorsSid                = 64,
+        WinUntrustedLabelSid                        = 65,
+        WinLowLabelSid                              = 66,
+        WinMediumLabelSid                           = 67,
+        WinHighLabelSid                             = 68,
+        WinSystemLabelSid                           = 69,
+        WinWriteRestrictedCodeSid                   = 70,
+        WinCreatorOwnerRightsSid                    = 71,
+        WinCacheablePrincipalsGroupSid              = 72,
+        WinNonCacheablePrincipalsGroupSid           = 73,
+        WinEnterpriseReadonlyControllersSid         = 74,
+        WinAccountReadonlyControllersSid            = 75,
+        WinBuiltinEventLogReadersGroup              = 76,
+        WinNewEnterpriseReadonlyControllersSid      = 77,
+        WinBuiltinCertSvcDComAccessGroup            = 78,
+        WinMediumPlusLabelSid                       = 79,
+        WinLocalLogonSid                            = 80,
+        WinConsoleLogonSid                          = 81,
+        WinThisOrganizationCertificateSid           = 82,
+        WinApplicationPackageAuthoritySid           = 83,
+        WinBuiltinAnyPackageSid                     = 84,
+        WinCapabilityInternetClientSid              = 85,
+        WinCapabilityInternetClientServerSid        = 86,
+        WinCapabilityPrivateNetworkClientServerSid  = 87,
+        WinCapabilityPicturesLibrarySid             = 88,
+        WinCapabilityVideosLibrarySid               = 89,
+        WinCapabilityMusicLibrarySid                = 90,
+        WinCapabilityDocumentsLibrarySid            = 91,
+        WinCapabilitySharedUserCertificatesSid      = 92,
+        WinCapabilityEnterpriseAuthenticationSid    = 93,
+        WinCapabilityRemovableStorageSid            = 94,
+        WinBuiltinRDSRemoteAccessServersSid         = 95,
+        WinBuiltinRDSEndpointServersSid             = 96,
+        WinBuiltinRDSManagementServersSid           = 97,
+        WinUserModeDriversSid                       = 98,
+        WinBuiltinHyperVAdminsSid                   = 99,
+        WinAccountCloneableControllersSid           = 100,
     }
 }

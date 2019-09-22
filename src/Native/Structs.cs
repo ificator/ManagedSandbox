@@ -234,6 +234,22 @@ namespace ManagedSandbox.Native
     }
 
     /// <summary>
+    /// Defines the security capabilities of the app container.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct SECURITY_CAPABILITIES
+    {
+        /// <summary>
+        /// The SID of the AppContainer.
+        /// NOTE: Cannot be SafeSecurityIdentifier to avoid issues with Marshal.StructureToPtr.
+        /// </summary>
+        public IntPtr AppContainerSid;
+        public IntPtr Capabilities;
+        public Int32 CapabilityCount;
+        public Int32 Reserved;
+    }
+
+    /// <summary>
     /// The SID_AND_ATTRIBUTES structure represents a security identifier (SID) and its attributes. SIDs are used to uniquely
     /// identify users or groups.
     /// </summary>
@@ -242,13 +258,14 @@ namespace ManagedSandbox.Native
     {
         /// <summary>
         /// The SID for which the attributes are applicable.
+        /// NOTE: Cannot be SafeSecurityIdentifier to avoid issues with Marshal.StructureToPtr.
         /// </summary>
         public IntPtr Sid;
 
         /// <summary>
         /// Contains up to 32 one-bit flags. The meaning depends on the definition and use of the SID.
         /// </summary>
-        public UInt32 Attributes;
+        public SID_ATTRIBUTES Attributes;
     }
 
     /// <summary>

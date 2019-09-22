@@ -23,17 +23,40 @@
  */
 
 using System;
+using System.ComponentModel;
+
+using ManagedSandbox.Native;
 
 namespace ManagedSandbox
 {
     public class SandboxException : Exception
     {
-        public SandboxException(string message) : base(message)
+        public SandboxException(string message, HResult hresult) : base(message)
         {
+            this.HResult = hresult;
         }
 
-        public SandboxException(string message, Exception innerException) : base(message, innerException)
+        public SandboxException(string message, Win32Exception innerException) : base(message, innerException)
         {
+            this.HResult = SandboxException.MapErrorToHResult((Error)innerException.NativeErrorCode);
+        }
+
+        public new HResult HResult
+        {
+            get { return (HResult)base.HResult; }
+            set { base.HResult = (int)value; }
+        }
+
+        private static HResult MapErrorToHResult(Error error)
+        {
+            switch (error)
+            {
+                case Error.AccessDenied:        return Native.HResult.AccessDenied;
+                case Error.AlreadyExists:       return Native.HResult.AlreadyExists;
+                case Error.InsufficientBuffer:  return Native.HResult.InsufficientBuffer;
+                case Error.InvalidParameter:    return Native.HResult.InvalidParameter;
+                default:                        return Native.HResult.Unknown;
+            }
         }
     }
 }

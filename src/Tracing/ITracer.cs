@@ -22,40 +22,10 @@
  * SOFTWARE.
  */
 
-using System.Diagnostics;
-
-using ManagedSandbox.Native;
-
-namespace ManagedSandbox.JobObject
+namespace ManagedSandbox.Tracing
 {
-    public class JobObjectProtection : IProtection
+    public interface ITracer
     {
-        public JobObjectProtection()
-        {
-            this.JobObject = JobObject.CreateOrOpenJobObject(jobObjectName: null);
-        }
-
-        /// <summary>
-        /// The <see cref="JobObject"/> instance utilized for this protection.
-        /// </summary>
-        public JobObject JobObject { get; }
-
-        public void Dispose()
-        {
-            this.JobObject.Dispose();
-        }
-
-        public void ModifyProcess(Process process)
-        {
-            this.JobObject.AssignProcess(process);
-        }
-
-        public void ModifyStartup(ref STARTUPINFOEX startupInfoEx, ref CREATE_PROCESS_FLAGS createProcessFlags)
-        {
-        }
-
-        public void ModifyToken(ref SafeTokenHandle currentToken)
-        {
-        }
+        void Trace(string component, string messageFormat, params object[] args);
     }
 }
