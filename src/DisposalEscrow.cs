@@ -22,43 +22,47 @@
  * SOFTWARE.
  */
 
-using System.Diagnostics;
-using ManagedSandbox.Native;
-using ManagedSandbox.Tracing;
+using System;
+using System.Collections.Generic;
 
-namespace ManagedSandbox.Desktop
+namespace ManagedSandbox
 {
-    public class DesktopProtection : IProtection
+    public class DisposalEscrow : IDisposable
     {
-        public DesktopProtection(ITracer tracer)
+        private readonly IList<IDisposable> disposables = new List<IDisposable>();
+
+        public void Add(IDisposable disposable)
         {
-            this.Desktop = Desktop.Create(tracer);
+            this.disposables.Add(disposable);
         }
 
-        /// <summary>
-        /// The <see cref="Desktop"/> instance utilized for this protection.
-        /// </summary>
-        public Desktop Desktop { get; }
-
-        public void Dispose()
+        public void Add(IEnumerable<IDisposable> disposables)
         {
-            this.Desktop.Dispose();
-        }
-
-        public void ModifyProcess(Process process)
-        {
-        }
-
-        public void ModifyStartup(ref STARTUPINFOEX startupInfoEx, ref CREATE_PROCESS_FLAGS createProcessFlags)
-        {
-            using (var windowStation = WindowStation.GetCurrent())
+            foreach (IDisposable disposable in disposables)
             {
-                startupInfoEx.StartupInfo.lpDesktop = windowStation.Name + "\\" + this.Desktop.Name;
+                this.disposables.Add(disposable);
             }
         }
 
-        public void ModifyToken(ref SafeTokenHandle currentToken)
+        public void Dispose()
         {
+            foreach (IDisposable disposable in this.disposables)
+            {
+                disposable.Dispose();
+            }
+
+            this.Reset();
+        }
+
+        public void Reset()
+        {
+            this.disposables.Clear();
+        }
+
+        public void Subsume(DisposalEscrow disposalEscrow)
+        {
+            this.Add(disposalEscrow.disposables);
+            disposalEscrow.Reset();
         }
     }
 }

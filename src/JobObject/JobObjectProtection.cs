@@ -23,16 +23,16 @@
  */
 
 using System.Diagnostics;
-
 using ManagedSandbox.Native;
+using ManagedSandbox.Tracing;
 
 namespace ManagedSandbox.JobObject
 {
     public class JobObjectProtection : IProtection
     {
-        public JobObjectProtection()
+        public JobObjectProtection(ITracer tracer)
         {
-            this.JobObject = JobObject.CreateOrOpenJobObject(jobObjectName: null);
+            this.JobObject = JobObject.CreateOrOpenJobObject(tracer, jobObjectName: null);
         }
 
         /// <summary>

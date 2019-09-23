@@ -26,27 +26,32 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-
 using ManagedSandbox.Native;
+using ManagedSandbox.Tracing;
 using Microsoft.Win32.SafeHandles;
 
 namespace ManagedSandbox.JobObject
 {
     public class JobObject : SafeHandleZeroOrMinusOneIsInvalid
     {
-        private JobObject(IntPtr unsafeJobObjectHandle, bool ownsHandle)
+        private readonly ITracer tracer;
+
+        private JobObject(ITracer tracer, IntPtr unsafeJobObjectHandle, bool ownsHandle)
             : base(ownsHandle)
         {
+            this.tracer = tracer;
             this.SetHandle(unsafeJobObjectHandle);
         }
 
         /// <summary>
         /// Creates a job object with the provided name, or opens one if it already exists.
         /// </summary>
+        /// <param name="tracer">A tracer instance.</param>
         /// <param name="jobObjectName">The name of the job object, or null if it should be unnamed</param>
         /// <returns>The handle to the new (or reused) job object</returns>
-        public static JobObject CreateOrOpenJobObject(string jobObjectName)
+        public static JobObject CreateOrOpenJobObject(ITracer tracer, string jobObjectName)
         {
+            tracer.Trace(nameof(JobObject), "Creating job object '{0}'", jobObjectName);
             IntPtr unsafeJobObjectHandle = Methods.CreateJobObject(null /* lpJobAttributes */, jobObjectName);
             if (unsafeJobObjectHandle == IntPtr.Zero)
             {
@@ -56,7 +61,7 @@ namespace ManagedSandbox.JobObject
                         new Win32Exception());
             }
 
-            var jobObject = new JobObject(unsafeJobObjectHandle, true /* ownsHandle */);
+            var jobObject = new JobObject(tracer, unsafeJobObjectHandle, true /* ownsHandle */);
 
             try
             {
@@ -78,6 +83,7 @@ namespace ManagedSandbox.JobObject
         /// <param name="process">The process to assign to the job object.</param>
         public void AssignProcess(Process process)
         {
+            this.tracer.Trace(nameof(JobObject), "Assigning process '{0}'", process.Id);
             if (!Methods.AssignProcessToJobObject(this.handle, process.Handle))
             {
                 throw
@@ -100,6 +106,8 @@ namespace ManagedSandbox.JobObject
             JOB_OBJECT_LIMIT_FLAGS limitFlags = JOB_OBJECT_LIMIT_FLAGS.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
             ulong? processMemoryLimitInBytes = null)
         {
+            this.tracer.Trace(nameof(JobObject), "Setting limits");
+
             var extendedLimitInformation = new JOBOBJECT_EXTENDED_LIMIT_INFORMATION
             {
                 BasicLimitInformation =
@@ -151,6 +159,8 @@ namespace ManagedSandbox.JobObject
         /// <param name="uiRestrictionsClass">The restriction class for the UI.</param>
         public void SetUiRestrictions(JOB_OBJECT_UILIMIT_FLAGS uiRestrictionsClass = JOB_OBJECT_UILIMIT_FLAGS.ALL)
         {
+            this.tracer.Trace(nameof(JobObject), "Setting UI restrictions");
+
             var uiRestrictions = new JOBOBJECT_BASIC_UI_RESTRICTIONS
             {
                 UIRestrictionsClass = uiRestrictionsClass,

@@ -48,6 +48,7 @@
     <Compile Include="AppContainer\AppContainerProtection.cs" />
     <Compile Include="Desktop\Desktop.cs" />
     <Compile Include="Desktop\DesktopProtection.cs" />
+    <Compile Include="DisposalEscrow.cs" />
     <Compile Include="IProtection.cs" />
     <Compile Include="JobObject\JobObject.cs" />
     <Compile Include="JobObject\JobObjectProtection.cs" />
@@ -59,6 +60,7 @@
     <Compile Include="Native\Enums.cs" />
     <Compile Include="Native\Methods.cs" />
     <Compile Include="Native\SafeHGlobalBuffer.cs" />
+    <Compile Include="Native\SafeProcThreadAttributeList.cs" />
     <Compile Include="Native\SafeSecurityIdentifier.cs" />
     <Compile Include="Native\SafeTokenHandle.cs" />
     <Compile Include="Native\Structs.cs" />

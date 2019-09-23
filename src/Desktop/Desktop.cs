@@ -24,8 +24,8 @@
 
 using System;
 using System.ComponentModel;
-
 using ManagedSandbox.Native;
+using ManagedSandbox.Tracing;
 
 namespace ManagedSandbox.Desktop
 {
@@ -40,14 +40,17 @@ namespace ManagedSandbox.Desktop
         /// <summary>
         /// Creates a new desktop with minimal rights.
         /// </summary>
+        /// <param name="tracer">A tracer instance.</param>
         /// <returns>The desktop instance.</returns>
-        public static Desktop Create()
+        public static Desktop Create(ITracer tracer)
         {
             using (Desktop currentDesktop = Desktop.GetCurrent())
             {
                 try
                 {
                     string name = "sbox" + DateTime.UtcNow.Ticks;
+                    tracer.Trace(nameof(Desktop), "Creating desktop '{0}'", name);
+
                     IntPtr unsafeDesktopHandle = Methods.CreateDesktop(
                         name,
                         device: null,
@@ -62,6 +65,8 @@ namespace ManagedSandbox.Desktop
                                 $"Unable to create new desktop",
                                 new Win32Exception());
                     }
+
+                    tracer.Trace( nameof(Desktop), "Desktop successfully created");
 
                     return new Desktop(unsafeDesktopHandle, ownsHandle: true)
                     {

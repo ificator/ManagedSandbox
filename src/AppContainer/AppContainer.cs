@@ -33,11 +33,18 @@ namespace ManagedSandbox.AppContainer
 {
     public class AppContainer : IDisposable
     {
-        private readonly SafeHGlobalBuffer attributeListHandle;
+        private readonly SafeProcThreadAttributeList attributeListHandle;
+        private readonly DisposalEscrow disposalEscrow;
         private readonly SafeSecurityIdentifier securityIdentifierHandle;
+        private readonly ITracer tracer;
 
-        private AppContainer(string name, SafeSecurityIdentifier securityIdentifierHandle)
+        private AppContainer(ITracer tracer, string name, SafeSecurityIdentifier securityIdentifierHandle)
         {
+            if (tracer == null)
+            {
+                throw new ArgumentNullException(nameof(tracer));
+            }
+
             if (name == null)
             {
                 throw new ArgumentNullException(nameof(name));
@@ -56,8 +63,11 @@ namespace ManagedSandbox.AppContainer
                 this.FolderPath = folderPath;
             }
 
-            this.attributeListHandle = AppContainer.AllocateAttributeList(securityIdentifierHandle);
+            this.disposalEscrow = new DisposalEscrow();
             this.securityIdentifierHandle = securityIdentifierHandle;
+            this.tracer = tracer;
+
+            this.attributeListHandle = this.AllocateAttributeList();
         }
 
         /// <summary>
@@ -79,6 +89,7 @@ namespace ManagedSandbox.AppContainer
         /// Attempts to create the AppContainerProfile, and get the associated AppContainer SID. If the profile already exists the
         /// provided name will be used to derive the AppContainer SID.
         /// </summary>
+        /// <param name="tracer">A tracer instance.</param>
         /// <param name="appContainerName">The name of the AppContainer.</param>
         /// <param name="displayName">The display name of the AppContainer.</param>
         /// <param name="description">The description of the AppContainer.</param>
@@ -96,7 +107,7 @@ namespace ManagedSandbox.AppContainer
             try
             {
                 tracer.Trace(nameof(AppContainer), "Creating profile for '{0}'", appContainerName);
-                AppContainer newAppContainer = AppContainer.CreateProfile(appContainerName, displayName, description);
+                AppContainer newAppContainer = AppContainer.CreateProfile(tracer, appContainerName, displayName, description);
                 tracer.Trace(nameof(AppContainer), "AppContainerCid = {0}", newAppContainer.SecurityIdentifier);
                 return newAppContainer;
             }
@@ -105,7 +116,7 @@ namespace ManagedSandbox.AppContainer
                 if (ex.HResult == HResult.AlreadyExists)
                 {
                     tracer.Trace(nameof(AppContainer), "Profile already existed for '{0}'", appContainerName);
-                    AppContainer existingAppContainer = AppContainer.DeriveFromName(appContainerName);
+                    AppContainer existingAppContainer = AppContainer.DeriveFromName(tracer, appContainerName);
                     tracer.Trace(nameof(AppContainer), "AppContainerCid = {0}", existingAppContainer.SecurityIdentifier);
                     return existingAppContainer;
                 }
@@ -125,6 +136,7 @@ namespace ManagedSandbox.AppContainer
         public void Dispose()
         {
             this.attributeListHandle.Dispose();
+            this.disposalEscrow.Dispose();
             this.securityIdentifierHandle.Dispose();
         }
 
@@ -134,57 +146,12 @@ namespace ManagedSandbox.AppContainer
         /// <param name="startupInfoEx">The structure to modify.</param>
         public void SetAttributeList(ref STARTUPINFOEX startupInfoEx)
         {
+            this.tracer.Trace(nameof(AppContainer), "Setting attribute list");
             startupInfoEx.lpAttributeList = this.attributeListHandle.DangerousGetHandle();
         }
 
-        private static SafeHGlobalBuffer AllocateAttributeList(SafeSecurityIdentifier securityIdentifierHandle)
-        {
-            SECURITY_CAPABILITIES securityCapabilities = new SECURITY_CAPABILITIES();
-            AppContainer.SetSecurityCapabilities(
-                ref securityCapabilities,
-                securityIdentifierHandle,
-                new WELL_KNOWN_SID_TYPE[] { WELL_KNOWN_SID_TYPE.WinCapabilityInternetClientSid });
-
-            Int32 size = 0;
-            Methods.InitializeProcThreadAttributeList(IntPtr.Zero, 1, 0, ref size);
-
-            var attributeListMemory = new SafeHGlobalBuffer(size);
-            try
-            {
-                if (!Methods.InitializeProcThreadAttributeList(attributeListMemory.DangerousGetHandle(), 1, 0, ref size))
-                {
-                    throw new SandboxException(
-                        "Unable to initialize process thread attribute list.",
-                        new Win32Exception());
-                }
-
-                var securityCapabilitiesMemory = new SafeHGlobalBuffer(Marshal.SizeOf(securityCapabilities));
-                Marshal.StructureToPtr(securityCapabilities, securityCapabilitiesMemory.DangerousGetHandle(), fDeleteOld: false);
-
-                if (!Methods.UpdateProcThreadAttribute(
-                        attributeListMemory.DangerousGetHandle(),
-                        dwFlags: 0,
-                        attribute: PROC_THREAD_ATTRIBUTES.PROC_THREAD_ATTRIBUTE_SECURITY_CAPABILITIES,
-                        securityCapabilitiesMemory.DangerousGetHandle(),
-                        securityCapabilitiesMemory.Size,
-                        lpPreviousValue: IntPtr.Zero,
-                        lpReturnSize: IntPtr.Zero))
-                {
-                    throw new SandboxException(
-                        $"Failed to update proc thread attribute list (0x{Marshal.GetLastWin32Error():X08})",
-                        new Win32Exception()); ;
-                }
-
-                return attributeListMemory;
-            }
-            catch
-            {
-                attributeListMemory.Dispose();
-                throw;
-            }
-        }
-
         private static AppContainer CreateProfile(
+            ITracer tracer,
             string appContainerName,
             string displayName = null,
             string description = null)
@@ -206,7 +173,7 @@ namespace ManagedSandbox.AppContainer
 
             try
             {
-                return new AppContainer(appContainerName, appContainerSid);
+                return new AppContainer(tracer, appContainerName, appContainerSid);
             }
             catch
             {
@@ -215,7 +182,7 @@ namespace ManagedSandbox.AppContainer
             }
         }
 
-        private static AppContainer DeriveFromName(string appContainerName)
+        private static AppContainer DeriveFromName(ITracer tracer, string appContainerName)
         {
             SafeSecurityIdentifier appContainerSid = null;
             HResult result = Methods.DeriveAppContainerSidFromAppContainerName(appContainerName, out appContainerSid);
@@ -228,7 +195,7 @@ namespace ManagedSandbox.AppContainer
 
             try
             {
-                return new AppContainer(appContainerName, appContainerSid);
+                return new AppContainer(tracer, appContainerName, appContainerSid);
             }
             catch
             {
@@ -237,35 +204,66 @@ namespace ManagedSandbox.AppContainer
             }
         }
 
-        private static void SetSecurityCapabilities(
+        private SafeProcThreadAttributeList AllocateAttributeList()
+        {
+            using (var localDisposalEscrow = new DisposalEscrow())
+            {
+                SECURITY_CAPABILITIES securityCapabilities = new SECURITY_CAPABILITIES();
+                this.SetSecurityCapabilities(
+                    ref securityCapabilities,
+                    this.securityIdentifierHandle,
+                    new WELL_KNOWN_SID_TYPE[] { WELL_KNOWN_SID_TYPE.WinCapabilityInternetClientSid });
+
+                var attributeListHandle = new SafeProcThreadAttributeList(1);
+                localDisposalEscrow.Add(attributeListHandle);
+
+                var securityCapabilitiesMemory = new SafeHGlobalBuffer(Marshal.SizeOf(securityCapabilities));
+                localDisposalEscrow.Add(securityCapabilitiesMemory);
+
+                Marshal.StructureToPtr(securityCapabilities, securityCapabilitiesMemory.DangerousGetHandle(), fDeleteOld: false);
+
+                if (!Methods.UpdateProcThreadAttribute(
+                        attributeListHandle.DangerousGetHandle(),
+                        dwFlags: 0,
+                        attribute: PROC_THREAD_ATTRIBUTES.PROC_THREAD_ATTRIBUTE_SECURITY_CAPABILITIES,
+                        securityCapabilitiesMemory.DangerousGetHandle(),
+                        securityCapabilitiesMemory.Size,
+                        lpPreviousValue: IntPtr.Zero,
+                        lpReturnSize: IntPtr.Zero))
+                {
+                    throw new SandboxException(
+                        $"Failed to update proc thread attribute list (0x{Marshal.GetLastWin32Error():X08})",
+                        new Win32Exception()); ;
+                }
+
+                this.disposalEscrow.Subsume(localDisposalEscrow);
+                return attributeListHandle;
+            }
+        }
+
+        private void SetSecurityCapabilities(
             ref SECURITY_CAPABILITIES securityCapabilities,
             SafeSecurityIdentifier appContainerSid,
             WELL_KNOWN_SID_TYPE[] appCapabilities)
         {
-            securityCapabilities.AppContainerSid = appContainerSid.DangerousGetHandle();
-            securityCapabilities.Capabilities = IntPtr.Zero;
-            securityCapabilities.CapabilityCount = 0;
-            securityCapabilities.Reserved = 0;
-
-            if (appCapabilities != null && appCapabilities.Length > 0)
+            using (var localDisposalEscrow = new DisposalEscrow())
             {
-                // BUGBUG: We can use "SecurityIdentifier" instead of the custom wellknownsidtype and lookup.
+                securityCapabilities.AppContainerSid = appContainerSid.DangerousGetHandle();
+                securityCapabilities.Capabilities = IntPtr.Zero;
+                securityCapabilities.CapabilityCount = 0;
+                securityCapabilities.Reserved = 0;
 
-                var disposables = new System.Collections.Generic.List<IDisposable>();
-                var attributesMemory = new SafeHGlobalBuffer(Marshal.SizeOf(typeof(SID_AND_ATTRIBUTES)) * appCapabilities.Length);
-
-                try
+                if (appCapabilities != null && appCapabilities.Length > 0)
                 {
-                    // BUGBUG: Probably doesn't clean up, but what is the lifetime?
-                    disposables.Add(attributesMemory);
+                    var attributesMemory = new SafeHGlobalBuffer(Marshal.SizeOf(typeof(SID_AND_ATTRIBUTES)) * appCapabilities.Length);
+                    localDisposalEscrow.Add(attributesMemory);
 
                     for (int i = 0; i < appCapabilities.Length; i++)
                     {
                         Int32 sidSize = Constants.SECURITY_MAX_SID_SIZE;
 
-                        // BUGBUG: Leaks on success
                         var safeMemory = new SafeHGlobalBuffer(sidSize);
-                        disposables.Add(safeMemory);
+                        localDisposalEscrow.Add(safeMemory);
 
                         if (!Methods.CreateWellKnownSid(appCapabilities[i], IntPtr.Zero, safeMemory, ref sidSize))
                         {
@@ -282,21 +280,13 @@ namespace ManagedSandbox.AppContainer
 
                         Marshal.StructureToPtr(attribute, IntPtr.Add(attributesMemory.DangerousGetHandle(), i * Marshal.SizeOf(typeof(SID_AND_ATTRIBUTES))), fDeleteOld: false);
                     }
-                }
-                catch
-                {
-                    foreach (IDisposable disposable in disposables)
-                    {
-                        disposable.Dispose();
-                    }
 
-                    throw;
+                    securityCapabilities.Capabilities = attributesMemory.DangerousGetHandle();
+                    securityCapabilities.CapabilityCount = appCapabilities.Length;
                 }
 
-                securityCapabilities.Capabilities = attributesMemory.DangerousGetHandle();
-                securityCapabilities.CapabilityCount = appCapabilities.Length;
+                this.disposalEscrow.Subsume(localDisposalEscrow);
             }
         }
-
     }
 }

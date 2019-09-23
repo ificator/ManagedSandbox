@@ -300,6 +300,15 @@ namespace ManagedSandbox.Native
         public static extern HResult DeleteAppContainerProfile(string pszAppContainerName);
 
         /// <summary>
+        /// Deletes the specified list of attributes for process and thread creation.
+        /// </summary>
+        /// <param name="lpAttributeList">
+        /// The attribute list. This list is created by the InitializeProcThreadAttributeList function.
+        /// </param>
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern void DeleteProcThreadAttributeList(IntPtr lpAttributeList);
+
+        /// <summary>
         /// Gets the path of the local app data folder for the specified app container.
         /// </summary>
         /// <param name="pszAppContainerSid">The SID of the app container (in string form).</param>

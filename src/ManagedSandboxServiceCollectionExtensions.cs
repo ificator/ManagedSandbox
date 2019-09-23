@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 
-using System.Collections.Generic;
 using ManagedSandbox.AppContainer;
 using ManagedSandbox.Desktop;
 using ManagedSandbox.JobObject;

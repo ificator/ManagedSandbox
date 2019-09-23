@@ -22,43 +22,40 @@
  * SOFTWARE.
  */
 
-using System.Diagnostics;
-using ManagedSandbox.Native;
-using ManagedSandbox.Tracing;
+using System;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
 
-namespace ManagedSandbox.Desktop
+namespace ManagedSandbox.Native
 {
-    public class DesktopProtection : IProtection
+    public class SafeProcThreadAttributeList : SafeBuffer
     {
-        public DesktopProtection(ITracer tracer)
+        public SafeProcThreadAttributeList(int attributeCount) : base(ownsHandle: true)
         {
-            this.Desktop = Desktop.Create(tracer);
-        }
+            Int32 size = 0;
+            Methods.InitializeProcThreadAttributeList(IntPtr.Zero, 1, 0, ref size);
 
-        /// <summary>
-        /// The <see cref="Desktop"/> instance utilized for this protection.
-        /// </summary>
-        public Desktop Desktop { get; }
+            this.handle = Marshal.AllocHGlobal(size);
 
-        public void Dispose()
-        {
-            this.Desktop.Dispose();
-        }
-
-        public void ModifyProcess(Process process)
-        {
-        }
-
-        public void ModifyStartup(ref STARTUPINFOEX startupInfoEx, ref CREATE_PROCESS_FLAGS createProcessFlags)
-        {
-            using (var windowStation = WindowStation.GetCurrent())
+            if (!Methods.InitializeProcThreadAttributeList(this.handle, attributeCount, 0, ref size))
             {
-                startupInfoEx.StartupInfo.lpDesktop = windowStation.Name + "\\" + this.Desktop.Name;
+                Marshal.FreeHGlobal(this.handle);
+                throw new SandboxException(
+                    "Unable to initialize process thread attribute list.",
+                    new Win32Exception());
             }
         }
 
-        public void ModifyToken(ref SafeTokenHandle currentToken)
+        protected override bool ReleaseHandle()
         {
+            if (!this.IsInvalid)
+            {
+                Methods.DeleteProcThreadAttributeList(this.handle);
+                Marshal.FreeHGlobal(this.handle);
+                this.handle = IntPtr.Zero;
+            }
+
+            return true;
         }
     }
 }
