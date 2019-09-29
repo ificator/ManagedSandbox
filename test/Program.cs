@@ -25,6 +25,7 @@
 using System;
 using System.Diagnostics;
 using ManagedSandbox;
+using ManagedSandbox.AppContainer;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ManagedSandboxTest
@@ -66,6 +67,7 @@ namespace ManagedSandboxTest
                     }
 
                     using (var serviceProvider = services.BuildServiceProvider())
+                    using (new AppContainerPermissionScope(parameters, serviceProvider))
                     {
                         var sandboxedProcess = serviceProvider.GetService<SandboxedProcess>();
                         sandboxedProcess.Start(
@@ -83,6 +85,51 @@ namespace ManagedSandboxTest
                 Console.WriteLine($"Exception: {ex.GetType().Name}");
                 Console.WriteLine($"{ex.Message}");
                 Console.WriteLine($"{ex.StackTrace}");
+            }
+        }
+
+        private class AppContainerPermissionScope : IDisposable
+        {
+            private readonly bool isUsingAppContainer = false;
+            private readonly IServiceProvider serviceProvider;
+
+            public AppContainerPermissionScope(Parameters parameters, IServiceProvider serviceProvider)
+            {
+                this.isUsingAppContainer = parameters.AppContainer;
+                this.serviceProvider = serviceProvider;
+
+                if (this.isUsingAppContainer)
+                {
+                    AppContainerProtection appContainerProtection = serviceProvider.GetService<AppContainerProtection>();
+
+                    Console.WriteLine(
+                        "Assigning access to AppContainer '{0}' for directory '{1}'",
+                        appContainerProtection.AppContainer.SecurityIdentifier,
+                        Environment.CurrentDirectory);
+                    Process
+                        .Start(
+                            "icacls.exe",
+                            $"{Environment.CurrentDirectory} /grant *{appContainerProtection.AppContainer.SecurityIdentifier}:(OI)(CI)(F)")
+                        .WaitForExit();
+                }
+            }
+
+            public void Dispose()
+            {
+                if (this.isUsingAppContainer)
+                {
+                    AppContainerProtection appContainerProtection = serviceProvider.GetService<AppContainerProtection>();
+
+                    Console.WriteLine(
+                                "Removing access for AppContainer '{0}' from directory '{1}'",
+                        appContainerProtection.AppContainer.SecurityIdentifier,
+                        Environment.CurrentDirectory);
+                    Process
+                        .Start(
+                            "icacls.exe",
+                            $"{Environment.CurrentDirectory} /remove *{appContainerProtection.AppContainer.SecurityIdentifier}")
+                        .WaitForExit();
+                }
             }
         }
 

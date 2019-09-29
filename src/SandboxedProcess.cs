@@ -140,6 +140,8 @@ namespace ManagedSandbox
                     // Get a managed Process instance so we can avoid reimplementing all its goodness.
                     this.process = Process.GetProcessById(processInfo.dwProcessId);
 
+                    this.tracer.Trace(nameof(SandboxedProcess), "Created process {0}", this.process.Id);
+
                     // Let the protections modify the process now that it has been created.
                     this.tracer.Trace(nameof(SandboxedProcess), "Modifying sandboxed process");
                     foreach (IProtection protection in this.protections)

@@ -39,36 +39,39 @@ namespace ManagedSandbox
             string displayName = null,
             string description = null)
         {
-            services.AddTransient<IProtection, AppContainerProtection>(
+            services.AddSingleton<AppContainerProtection>(
                 x => new AppContainerProtection(x.GetService<ITracer>(), appContainerName, displayName, description));
+            services.AddSingleton<IProtection, AppContainerProtection>(x => x.GetService<AppContainerProtection>());
 
             return services;
         }
 
         public static IServiceCollection AddConsoleTracer(this IServiceCollection services)
         {
-            services.Replace(new ServiceDescriptor(typeof(ITracer), typeof(ConsoleTracer), ServiceLifetime.Transient));
+            services.Replace(new ServiceDescriptor(typeof(ITracer), typeof(ConsoleTracer), ServiceLifetime.Singleton));
 
             return services;
         }
 
         public static IServiceCollection AddDesktopProtection(this IServiceCollection services)
         {
-            services.AddTransient<IProtection, DesktopProtection>();
+            services.AddSingleton<DesktopProtection>();
+            services.AddSingleton<IProtection, DesktopProtection>(x => x.GetService<DesktopProtection>());
 
             return services;
         }
 
         public static IServiceCollection AddFileTracer(this IServiceCollection services, string fileName)
         {
-            services.Replace(new ServiceDescriptor(typeof(ITracer), x => new FileTracer(fileName), ServiceLifetime.Transient));
+            services.Replace(new ServiceDescriptor(typeof(ITracer), x => new FileTracer(fileName), ServiceLifetime.Singleton));
 
             return services;
         }
 
         public static IServiceCollection AddJobObjectProtection(this IServiceCollection services)
         {
-            services.AddTransient<IProtection, JobObjectProtection>();
+            services.AddSingleton<JobObjectProtection>();
+            services.AddSingleton<IProtection, JobObjectProtection>(x => x.GetService<JobObjectProtection>());
 
             return services;
         }
@@ -76,7 +79,7 @@ namespace ManagedSandbox
         public static IServiceCollection AddManagedSandbox(this IServiceCollection services)
         {
             services.AddTransient<SandboxedProcess>();
-            services.AddTransient<ITracer, NullTracer>();
+            services.AddSingleton<ITracer, NullTracer>();
 
             return services;
         }

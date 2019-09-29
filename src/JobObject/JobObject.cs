@@ -83,7 +83,7 @@ namespace ManagedSandbox.JobObject
         /// <param name="process">The process to assign to the job object.</param>
         public void AssignProcess(Process process)
         {
-            this.tracer.Trace(nameof(JobObject), "Assigning process '{0}'", process.Id);
+            this.tracer.Trace(nameof(JobObject), "Assigning process {0}", process.Id);
             if (!Methods.AssignProcessToJobObject(this.handle, process.Handle))
             {
                 throw
