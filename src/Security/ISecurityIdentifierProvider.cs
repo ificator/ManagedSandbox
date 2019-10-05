@@ -22,48 +22,20 @@
  * SOFTWARE.
  */
 
-using System;
-using System.Collections.Generic;
+using System.Security.Principal;
 
-namespace ManagedSandbox
+namespace ManagedSandbox.Security
 {
-    public class DisposalEscrow : IDisposable
+    public interface ISecurityIdentifierProvider
     {
-        private readonly IList<IDisposable> disposables = new List<IDisposable>();
-
-        public T Add<T>(T disposable) where T : IDisposable
-        {
-            this.disposables.Add(disposable);
-            return disposable;
-        }
-
-        public void Add(IEnumerable<IDisposable> disposables)
-        {
-            foreach (IDisposable disposable in disposables)
-            {
-                this.disposables.Add(disposable);
-            }
-        }
-
-        public void Dispose()
-        {
-            foreach (IDisposable disposable in this.disposables)
-            {
-                disposable.Dispose();
-            }
-
-            this.Reset();
-        }
-
-        public void Reset()
-        {
-            this.disposables.Clear();
-        }
-
-        public void Subsume(DisposalEscrow disposalEscrow)
-        {
-            this.Add(disposalEscrow.disposables);
-            disposalEscrow.Reset();
-        }
+        SecurityIdentifier CurrentUser { get; }
+        SecurityIdentifier Everyone { get; }
+        SecurityIdentifier Interactive { get; }
+        SecurityIdentifier LocalSystem { get; }
+        SecurityIdentifier Logon { get; }
+        SecurityIdentifier NetworkService { get; }
+        SecurityIdentifier Users { get; }
+        SecurityIdentifier Restricted { get; }
+        //SecurityIdentifier WinBuiltinAnyPackage { get; }
     }
 }

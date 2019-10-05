@@ -656,6 +656,43 @@ namespace ManagedSandbox.Native
     }
 
     /// <summary>
+    /// The TOKEN_INFORMATION_CLASS enumeration type contains values that specify the type of information being assigned to or
+    /// retrieved from an access token.
+    /// </summary>
+    public enum TOKEN_INFORMATION_CLASS
+    {
+        TokenUser = 1,
+        TokenGroups,
+        TokenPrivileges,
+        TokenOwner,
+        TokenPrimaryGroup,
+        TokenDefaultDacl,
+        TokenSource,
+        TokenType,
+        TokenImpersonationLevel,
+        TokenStatistics,
+        TokenRestrictedSids,
+        TokenSessionId,
+        TokenGroupsAndPrivileges,
+        TokenSessionReference,
+        TokenSandBoxInert,
+        TokenAuditPolicy,
+        TokenOrigin,
+        TokenElevationType,
+        TokenLinkedToken,
+        TokenElevation,
+        TokenHasRestrictions,
+        TokenAccessInformation,
+        TokenVirtualizationAllowed,
+        TokenVirtualizationEnabled,
+        TokenIntegrityLevel,
+        TokenUIAccess,
+        TokenMandatoryPolicy,
+        TokenLogonSid,
+        MaxTokenInfoClass,
+    }
+
+    /// <summary>
     /// Well known SID definitions for lookup.
     /// </summary>
     public enum WELL_KNOWN_SID_TYPE

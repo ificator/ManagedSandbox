@@ -405,6 +405,41 @@ namespace ManagedSandbox.Native
         public static extern int GetCurrentThreadId();
 
         /// <summary>
+        /// The function retrieves a specified type of information about an access token. The calling process must have appropriate
+        /// access rights to obtain the information.
+        /// </summary>
+        /// <param name="hToken">
+        /// A handle to an access token from which information is retrieved.
+        /// </param>
+        /// <param name="tokenInfoClass">
+        /// Specifies a value from the TOKEN_INFORMATION_CLASS enumerated type to identify the type of information the function
+        /// retrieves.
+        /// </param>
+        /// <param name="pTokenInfo">
+        /// A pointer to a buffer the function fills with the requested information.
+        /// </param>
+        /// <param name="tokenInfoLength">
+        /// Specifies the size, in bytes, of the buffer pointed to by the TokenInformation parameter.
+        /// </param>
+        /// <param name="returnLength">
+        /// A pointer to a variable that receives the number of bytes needed for the buffer pointed to by the TokenInformation
+        /// parameter.
+        /// </param>
+        /// <returns>
+        /// If the function succeeds, the return value is nonzero.
+        /// 
+        /// If the function fails, the return value is zero. To get extended error information, call GetLastError.
+        /// </returns>
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool GetTokenInformation(
+            SafeTokenHandle hToken,
+            TOKEN_INFORMATION_CLASS tokenInfoClass,
+            IntPtr pTokenInfo,
+            Int32 tokenInfoLength,
+            out Int32 returnLength);
+
+        /// <summary>
         /// Retrieves a handle to the desktop assigned to the specified thread.
         /// </summary>
         /// <param name="dwThreadId">

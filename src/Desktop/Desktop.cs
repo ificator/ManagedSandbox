@@ -24,6 +24,8 @@
 
 using System;
 using System.ComponentModel;
+using System.Runtime.InteropServices;
+using System.Security.AccessControl;
 using ManagedSandbox.Native;
 using ManagedSandbox.Tracing;
 
@@ -42,8 +44,9 @@ namespace ManagedSandbox.Desktop
         /// </summary>
         /// <param name="tracer">A tracer instance.</param>
         /// <returns>The desktop instance.</returns>
-        public static Desktop Create(ITracer tracer)
+        public static Desktop Create(ITracer tracer, string mandatoryLevelSacl)
         {
+            using (var disposalEscrow = new DisposalEscrow())
             using (Desktop currentDesktop = Desktop.GetCurrent())
             {
                 try
@@ -51,13 +54,34 @@ namespace ManagedSandbox.Desktop
                     string name = "sbox" + DateTime.UtcNow.Ticks;
                     tracer.Trace(nameof(Desktop), "Creating desktop '{0}'", name);
 
+                    SECURITY_ATTRIBUTES securityAttributes = null;
+                    if (mandatoryLevelSacl != null)
+                    {
+                        tracer.Trace(nameof(Desktop), "Generating security attributes for '{0}'", mandatoryLevelSacl);
+
+                        // If a security descriptor (in SDDL form) was provided convert it to binary form and then marshal
+                        // it into native memory to that we can pass it in to the native method.
+                        var rawSecurityDescriptor = new RawSecurityDescriptor(mandatoryLevelSacl);
+
+                        var binaryForm = new byte[rawSecurityDescriptor.BinaryLength];
+                        rawSecurityDescriptor.GetBinaryForm(binaryForm, 0 /* offset */);
+
+                        var nativeBinaryForm = disposalEscrow.Add(new SafeHGlobalBuffer(binaryForm.Length));
+                        Marshal.Copy(binaryForm, 0 /* startIndex */, nativeBinaryForm.DangerousGetHandle(), binaryForm.Length);
+
+                        securityAttributes = new SECURITY_ATTRIBUTES { lpSecurityDescriptor = nativeBinaryForm.DangerousGetHandle() };
+                    }
+
+                    // Since we're creating the desktop we'll ask for all rights so that we have the ability to modify security as
+                    // required. Since the created desktop will be referenced by name when creating the process this will not impact
+                    // the security of the desktop.
                     IntPtr unsafeDesktopHandle = Methods.CreateDesktop(
                         name,
                         device: null,
                         deviceMode: null,
                         flags: 0,
-                        DESKTOP_RIGHTS.DESKTOP_CREATEWINDOW,
-                        attributes: null);
+                        accessMask: DESKTOP_RIGHTS.GENERIC_ALL,
+                        attributes: securityAttributes);
                     if (unsafeDesktopHandle == IntPtr.Zero)
                     {
                         throw
@@ -66,7 +90,7 @@ namespace ManagedSandbox.Desktop
                                 new Win32Exception());
                     }
 
-                    tracer.Trace( nameof(Desktop), "Desktop successfully created");
+                    tracer.Trace(nameof(Desktop), "Desktop successfully created");
 
                     return new Desktop(unsafeDesktopHandle, ownsHandle: true)
                     {

@@ -23,13 +23,16 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Security.Principal;
 using ManagedSandbox.Native;
+using ManagedSandbox.Security;
 using ManagedSandbox.Tracing;
 
 namespace ManagedSandbox.AppContainer
 {
-    public class AppContainerProtection : IDisposable, IProtection
+    public class AppContainerProtection : IDisposable, IPrincipalProvider, IProtection
     {
         public AppContainerProtection(
             ITracer tracer,
@@ -48,6 +51,16 @@ namespace ManagedSandbox.AppContainer
         public void Dispose()
         {
             this.AppContainer.Dispose();
+        }
+
+        public string GetMandatoryLevelSacl()
+        {
+            return null;
+        }
+
+        public IEnumerable<SecurityIdentifier> GetSecurityIdentifiers()
+        {
+            yield return this.AppContainer.SecurityIdentifier;
         }
 
         public void ModifyProcess(Process process)

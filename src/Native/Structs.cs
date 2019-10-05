@@ -425,4 +425,18 @@ namespace ManagedSandbox.Native
             this.StartupInfo.cb = Marshal.SizeOf(typeof(STARTUPINFOEX));
         }
     }
+
+    /// <summary>
+    /// The TOKEN_GROUPS structure contains information about the group security identifiers (SIDs) in an access token.
+    /// 
+    /// NOTE: We need to walk the groups array but since it's variable length we need to do it manually by getting a pointer to each
+    ///       element. In order to do this we need the start to be predictable and therefore must be explicit about the structure.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct TOKEN_GROUPS
+    {
+        public UInt32 GroupCount;
+        [MarshalAs(UnmanagedType.ByValArray)]
+        public SID_AND_ATTRIBUTES[] Groups;
+    };
 }

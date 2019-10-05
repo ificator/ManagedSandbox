@@ -22,48 +22,24 @@
  * SOFTWARE.
  */
 
-using System;
 using System.Collections.Generic;
+using System.Security.Principal;
 
-namespace ManagedSandbox
+namespace ManagedSandbox.Security
 {
-    public class DisposalEscrow : IDisposable
+    public interface IPrincipalProvider
     {
-        private readonly IList<IDisposable> disposables = new List<IDisposable>();
+        /// <summary>
+        /// Returns a security descriptor, in SDDL format, that represents the manadtory level SACL.
+        /// </summary>
+        /// <returns>The mandatory level SACL, in SDDL format.</returns>
+        string GetMandatoryLevelSacl();
 
-        public T Add<T>(T disposable) where T : IDisposable
-        {
-            this.disposables.Add(disposable);
-            return disposable;
-        }
-
-        public void Add(IEnumerable<IDisposable> disposables)
-        {
-            foreach (IDisposable disposable in disposables)
-            {
-                this.disposables.Add(disposable);
-            }
-        }
-
-        public void Dispose()
-        {
-            foreach (IDisposable disposable in this.disposables)
-            {
-                disposable.Dispose();
-            }
-
-            this.Reset();
-        }
-
-        public void Reset()
-        {
-            this.disposables.Clear();
-        }
-
-        public void Subsume(DisposalEscrow disposalEscrow)
-        {
-            this.Add(disposalEscrow.disposables);
-            disposalEscrow.Reset();
-        }
+        /// <summary>
+        /// Returns the set of <see cref="SecurityIdentifier"/> instances representing principals that should be given access
+        /// to resources in order for the sandboxed process to function.
+        /// </summary>
+        /// <returns>The set of <see cref="SecurityIdentifier"/> instances.</returns>
+        IEnumerable<SecurityIdentifier> GetSecurityIdentifiers();
     }
 }

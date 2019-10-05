@@ -25,6 +25,7 @@
 using ManagedSandbox.AppContainer;
 using ManagedSandbox.Desktop;
 using ManagedSandbox.JobObject;
+using ManagedSandbox.Security;
 using ManagedSandbox.Tracing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -39,8 +40,12 @@ namespace ManagedSandbox
             string displayName = null,
             string description = null)
         {
+            // Register the actual instance.
             services.AddSingleton<AppContainerProtection>(
                 x => new AppContainerProtection(x.GetService<ITracer>(), appContainerName, displayName, description));
+
+            // Register the implemented interfaces.
+            services.AddSingleton<IPrincipalProvider, AppContainerProtection>(x => x.GetService<AppContainerProtection>());
             services.AddSingleton<IProtection, AppContainerProtection>(x => x.GetService<AppContainerProtection>());
 
             return services;
@@ -55,7 +60,10 @@ namespace ManagedSandbox
 
         public static IServiceCollection AddDesktopProtection(this IServiceCollection services)
         {
+            // Register the actual instance.
             services.AddSingleton<DesktopProtection>();
+
+            // Register the implemented interfaces.
             services.AddSingleton<IProtection, DesktopProtection>(x => x.GetService<DesktopProtection>());
 
             return services;
@@ -70,7 +78,10 @@ namespace ManagedSandbox
 
         public static IServiceCollection AddJobObjectProtection(this IServiceCollection services)
         {
+            // Register the actual instance.
             services.AddSingleton<JobObjectProtection>();
+
+            // Register the implemented interfaces.
             services.AddSingleton<IProtection, JobObjectProtection>(x => x.GetService<JobObjectProtection>());
 
             return services;
@@ -79,6 +90,7 @@ namespace ManagedSandbox
         public static IServiceCollection AddManagedSandbox(this IServiceCollection services)
         {
             services.AddTransient<SandboxedProcess>();
+            services.AddSingleton<ISecurityIdentifierProvider, SecurityIdentifierProvider>();
             services.AddSingleton<ITracer, NullTracer>();
 
             return services;

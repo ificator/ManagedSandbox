@@ -31,6 +31,10 @@ namespace ManagedSandbox
 {
     public class SandboxException : Exception
     {
+        public SandboxException(string message) : base(message)
+        {
+        }
+
         public SandboxException(string message, HResult hresult) : base(message)
         {
             this.HResult = hresult;

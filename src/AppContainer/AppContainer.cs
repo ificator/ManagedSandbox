@@ -214,11 +214,8 @@ namespace ManagedSandbox.AppContainer
                     this.securityIdentifierHandle,
                     new WELL_KNOWN_SID_TYPE[] { WELL_KNOWN_SID_TYPE.WinCapabilityInternetClientSid });
 
-                var attributeListHandle = new SafeProcThreadAttributeList(1);
-                localDisposalEscrow.Add(attributeListHandle);
-
-                var securityCapabilitiesMemory = new SafeHGlobalBuffer(Marshal.SizeOf(securityCapabilities));
-                localDisposalEscrow.Add(securityCapabilitiesMemory);
+                var attributeListHandle = localDisposalEscrow.Add(new SafeProcThreadAttributeList(1));
+                var securityCapabilitiesMemory = localDisposalEscrow.Add(new SafeHGlobalBuffer(Marshal.SizeOf(securityCapabilities)));
 
                 Marshal.StructureToPtr(securityCapabilities, securityCapabilitiesMemory.DangerousGetHandle(), fDeleteOld: false);
 
@@ -255,15 +252,13 @@ namespace ManagedSandbox.AppContainer
 
                 if (appCapabilities != null && appCapabilities.Length > 0)
                 {
-                    var attributesMemory = new SafeHGlobalBuffer(Marshal.SizeOf(typeof(SID_AND_ATTRIBUTES)) * appCapabilities.Length);
-                    localDisposalEscrow.Add(attributesMemory);
+                    var attributesMemory = localDisposalEscrow.Add(new SafeHGlobalBuffer(Marshal.SizeOf(typeof(SID_AND_ATTRIBUTES)) * appCapabilities.Length));
 
                     for (int i = 0; i < appCapabilities.Length; i++)
                     {
                         Int32 sidSize = Constants.SECURITY_MAX_SID_SIZE;
 
-                        var safeMemory = new SafeHGlobalBuffer(sidSize);
-                        localDisposalEscrow.Add(safeMemory);
+                        var safeMemory = localDisposalEscrow.Add(new SafeHGlobalBuffer(sidSize));
 
                         if (!Methods.CreateWellKnownSid(appCapabilities[i], IntPtr.Zero, safeMemory, ref sidSize))
                         {

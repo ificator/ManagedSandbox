@@ -22,17 +22,60 @@
  * SOFTWARE.
  */
 
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using ManagedSandbox.Native;
+using ManagedSandbox.Security;
 using ManagedSandbox.Tracing;
 
 namespace ManagedSandbox.Desktop
 {
     public class DesktopProtection : IProtection
     {
-        public DesktopProtection(ITracer tracer)
+        public DesktopProtection(
+            IEnumerable<IPrincipalProvider> principalProviders,
+            ITracer tracer)
         {
-            this.Desktop = Desktop.Create(tracer);
+            string mandatoryLevelSacl = null;
+            foreach (var principalProvider in principalProviders)
+            {
+                string tempMandatoryLevelSacl = principalProvider.GetMandatoryLevelSacl();
+                if (tempMandatoryLevelSacl != null)
+                {
+                    if (mandatoryLevelSacl != null)
+                    {
+                        throw new SandboxException("Multiple SDDLs available - only one can be used.");
+                    }
+
+                    mandatoryLevelSacl = tempMandatoryLevelSacl;
+                }
+            }
+
+            this.Desktop = Desktop.Create(tracer, mandatoryLevelSacl);
+
+            var desktopSecurity = new DesktopSecurity(
+                this.Desktop,
+                AccessControlSections.Access);
+            foreach (var principalProvider in principalProviders)
+            {
+                IEnumerable<SecurityIdentifier> securityIdentifiers = principalProvider.GetSecurityIdentifiers();
+                if (securityIdentifiers != null)
+                {
+                    foreach (SecurityIdentifier securityIdentifier in securityIdentifiers)
+                    {
+                        tracer.Trace(nameof(DesktopProtection), $"Granting access to desktop {this.Desktop.Name} to {securityIdentifier}");
+                        desktopSecurity.SetAccessRule(
+                            new DesktopAccessRule(
+                                securityIdentifier,
+                                DesktopRights.GENERIC_READ |
+                                DesktopRights.DESKTOP_WRITEOBJECTS,
+                                AccessControlType.Allow));
+                    }
+                }
+            }
+            desktopSecurity.Commit();
         }
 
         /// <summary>
