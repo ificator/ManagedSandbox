@@ -1,6 +1,8 @@
 # ManagedSandbox
 A managed sandbox implementation that lets developers choose between various levels of security.
 
+NOTE: This code is intended to lay the foundation for creating a secure sandbox, but by default is not fully locked down.
+
 The following resources were used to write this code:
 
 |Resource|Usage|
@@ -22,9 +24,9 @@ var sandboxProcess = SandboxedProcess.Start(
 ```
 
 ## Protections
-### JobObject
-### Desktop
-### Restricted Token
 ### AppContainer
+### Desktop
+### JobObject
+### Restricted Token
 
 ## Troubleshooting
