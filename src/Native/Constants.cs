@@ -28,6 +28,11 @@ namespace ManagedSandbox.Native
 {
     public static class Constants
     {
+        public static SID_IDENTIFIER_AUTHORITY SECURITY_MANDATORY_LABEL_AUTHORITY = new SID_IDENTIFIER_AUTHORITY()
+        {
+            Value = new byte[] { 0, 0, 0, 0, 0, 16 },
+        };
+
         public const Int32 SECURITY_MAX_SID_SIZE = 68;
     }
 }

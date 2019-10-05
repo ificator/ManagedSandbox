@@ -26,16 +26,16 @@ using System.Security.Principal;
 
 namespace ManagedSandbox.Security
 {
-    public interface ISecurityIdentifierProvider
+    public interface IIdentityProvider
     {
-        SecurityIdentifier CurrentUser { get; }
-        SecurityIdentifier Everyone { get; }
-        SecurityIdentifier Interactive { get; }
-        SecurityIdentifier LocalSystem { get; }
-        SecurityIdentifier Logon { get; }
-        SecurityIdentifier NetworkService { get; }
-        SecurityIdentifier Users { get; }
-        SecurityIdentifier Restricted { get; }
-        //SecurityIdentifier WinBuiltinAnyPackage { get; }
+        WindowsIdentity CurrentUser { get; }
+        SecurityIdentifier CurrentUserSid { get; }
+        SecurityIdentifier EveryoneSid { get; }
+        SecurityIdentifier InteractiveSid { get; }
+        SecurityIdentifier LocalSystemSid { get; }
+        SecurityIdentifier LogonSid { get; }
+        SecurityIdentifier NetworkServiceSid { get; }
+        SecurityIdentifier UsersSid { get; }
+        SecurityIdentifier RestrictedSid { get; }
     }
 }

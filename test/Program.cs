@@ -66,6 +66,11 @@ namespace ManagedSandboxTest
                         services.AddJobObjectProtection();
                     }
 
+                    if (parameters.RestrictedToken)
+                    {
+                        services.AddRestrictedTokenProtection();
+                    }
+
                     using (var serviceProvider = services.BuildServiceProvider())
                     using (new AppContainerPermissionScope(parameters, serviceProvider))
                     {

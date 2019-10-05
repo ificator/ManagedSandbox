@@ -55,6 +55,11 @@ namespace ManagedSandbox
             this.Reset();
         }
 
+        public void Remove(IDisposable disposable)
+        {
+            this.disposables.Remove(disposable);
+        }
+
         public void Reset()
         {
             this.disposables.Clear();
@@ -64,6 +69,12 @@ namespace ManagedSandbox
         {
             this.Add(disposalEscrow.disposables);
             disposalEscrow.Reset();
+        }
+
+        public void Transfer(DisposalEscrow disposalEscrow, IDisposable disposable)
+        {
+            this.Add(disposable);
+            disposalEscrow.Remove(disposable);
         }
     }
 }

@@ -30,9 +30,9 @@ using ManagedSandbox.Native;
 
 namespace ManagedSandbox.Security
 {
-    public class SecurityIdentifierProvider : ISecurityIdentifierProvider
+    public class IdentityProvider : IIdentityProvider
     {
-        private readonly Lazy<WindowsIdentity> currentUserIdentity;
+        private readonly Lazy<WindowsIdentity> currentUser;
         private readonly Lazy<SecurityIdentifier> currentUserSid;
         private readonly Lazy<SecurityIdentifier> everyoneSid;
         private readonly Lazy<SecurityIdentifier> interactiveSid;
@@ -42,10 +42,10 @@ namespace ManagedSandbox.Security
         private readonly Lazy<SecurityIdentifier> usersSid;
         private readonly Lazy<SecurityIdentifier> restrictedSid;
 
-        public SecurityIdentifierProvider()
+        public IdentityProvider()
         {
-            this.currentUserIdentity = new Lazy<WindowsIdentity>(() => WindowsIdentity.GetCurrent());
-            this.currentUserSid = new Lazy<SecurityIdentifier>(() => this.currentUserIdentity.Value.User);
+            this.currentUser = new Lazy<WindowsIdentity>(() => WindowsIdentity.GetCurrent());
+            this.currentUserSid = new Lazy<SecurityIdentifier>(() => this.currentUser.Value.User);
             this.everyoneSid = new Lazy<SecurityIdentifier>(() => new SecurityIdentifier("S-1-1-0"));
             this.interactiveSid = new Lazy<SecurityIdentifier>(() => new SecurityIdentifier("S-1-5-4"));
             this.localSystemSid = new Lazy<SecurityIdentifier>(() => new SecurityIdentifier("S-1-5-18"));
@@ -55,28 +55,30 @@ namespace ManagedSandbox.Security
             this.restrictedSid = new Lazy<SecurityIdentifier>(() => new SecurityIdentifier("S-1-5-12"));
         }
 
-        public SecurityIdentifier CurrentUser => this.currentUserSid.Value;
+        public WindowsIdentity CurrentUser => this.currentUser.Value;
 
-        public SecurityIdentifier Everyone => this.everyoneSid.Value;
+        public SecurityIdentifier CurrentUserSid => this.currentUserSid.Value;
 
-        public SecurityIdentifier Interactive => this.interactiveSid.Value;
+        public SecurityIdentifier EveryoneSid => this.everyoneSid.Value;
 
-        public SecurityIdentifier LocalSystem => this.localSystemSid.Value;
+        public SecurityIdentifier InteractiveSid => this.interactiveSid.Value;
 
-        public SecurityIdentifier Logon => this.logonSid.Value;
+        public SecurityIdentifier LocalSystemSid => this.localSystemSid.Value;
 
-        public SecurityIdentifier NetworkService => this.networkServiceSid.Value;
+        public SecurityIdentifier LogonSid => this.logonSid.Value;
 
-        public SecurityIdentifier Users => this.usersSid.Value;
+        public SecurityIdentifier NetworkServiceSid => this.networkServiceSid.Value;
 
-        public SecurityIdentifier Restricted => this.restrictedSid.Value;
+        public SecurityIdentifier UsersSid => this.usersSid.Value;
+
+        public SecurityIdentifier RestrictedSid => this.restrictedSid.Value;
 
         private SecurityIdentifier GetLogonSid()
         {
             // Get the token for the current user. Note that we need to create a SafeTokenHandle of the token in order to safely call
             // the token functions, but the token that's available is owned by the WindowsIdentity instance and should not be closed
             // after we're done with it.
-            using (var currentToken = new SafeTokenHandle(this.currentUserIdentity.Value.Token, ownsHandle: false))
+            using (var currentToken = new SafeTokenHandle(this.currentUser.Value.Token, ownsHandle: false))
             {
                 // Get the current access token and query it for the token groups. The logon SID can then be extracted by
                 // enumerating the resulting structures.
@@ -139,7 +141,7 @@ namespace ManagedSandbox.Security
             // LocalSystem doesn't have a Logon SID and and so it's not possible to create a restricted process using
             // this approach for processes executing using that identity. Since this is a known scenario make sure the
             // error message helps debug it.
-            if (this.CurrentUser == this.LocalSystem)
+            if (this.CurrentUserSid == this.LocalSystemSid)
             {
                 throw new SandboxException(
                     "Cannot create a restricted process as LocalSystem (does not have a Logon SID)");

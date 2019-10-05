@@ -33,7 +33,7 @@ namespace ManagedSandbox.Native
     [Flags]
     public enum CREATE_PROCESS_FLAGS
     {
-        NONE                                = 0x00000000,
+        NONE = 0x00000000,
 
         /// <summary>
         /// The calling thread starts and debugs the new process and all child processes created by the new process. It can receive
@@ -42,32 +42,32 @@ namespace ManagedSandbox.Native
         /// chain is created with DEBUG_PROCESS.
         /// If this flag is combined with DEBUG_ONLY_THIS_PROCESS, the caller debugs only the new process, not any child processes.
         /// </summary>
-        DEBUG_PROCESS                       = 0x00000001,
+        DEBUG_PROCESS = 0x00000001,
 
         /// <summary>
         /// The calling thread starts and debugs the new process. It can receive all related debug events using the WaitForDebugEvent
         /// function.
         /// </summary>
-        DEBUG_ONLY_THIS_PROCESS             = 0x00000002,
+        DEBUG_ONLY_THIS_PROCESS = 0x00000002,
 
         /// <summary>
         /// The primary thread of the new process is created in a suspended state, and does not run until the ResumeThread function
         /// is called.
         /// </summary>
-        CREATE_SUSPENDED                    = 0x00000004,
+        CREATE_SUSPENDED = 0x00000004,
 
         /// <summary>
         /// For console processes, the new process does not inherit its parent's console (the default). The new process can call the
         /// AllocConsole function at a later time to create a console.
         /// This value cannot be used with CREATE_NEW_CONSOLE.
         /// </summary>
-        DETACHED_PROCESS                    = 0x00000008,
+        DETACHED_PROCESS = 0x00000008,
 
         /// <summary>
         /// The new process has a new console, instead of inheriting its parent's console (the default).
         /// This flag cannot be used with DETACHED_PROCESS.
         /// </summary>
-        CREATE_NEW_CONSOLE                  = 0x00000010,
+        CREATE_NEW_CONSOLE = 0x00000010,
 
         /// <summary>
         /// The new process is the root process of a new process group. The process group includes all processes that are descendants
@@ -77,13 +77,13 @@ namespace ManagedSandbox.Native
         /// If this flag is specified, CTRL+C signals will be disabled for all processes within the new process group.
         /// This flag is ignored if specified with CREATE_NEW_CONSOLE.
         /// </summary>
-        CREATE_NEW_PROCESS_GROUP            = 0x00000200,
+        CREATE_NEW_PROCESS_GROUP = 0x00000200,
 
         /// <summary>
         /// If this flag is set, the environment block pointed to by lpEnvironment uses Unicode characters. Otherwise, the environment
         /// block uses ANSI characters.
         /// </summary>
-        CREATE_UNICODE_ENVIRONMENT          = 0x00000400,
+        CREATE_UNICODE_ENVIRONMENT = 0x00000400,
 
         /// <summary>
         /// This flag is valid only when starting a 16-bit Windows-based application. If set, the new process runs in a private Virtual
@@ -100,13 +100,13 @@ namespace ManagedSandbox.Native
         /// The flag is valid only when starting a 16-bit Windows-based application. If the DefaultSeparateVDM switch in the Windows
         /// section of WIN.INI is TRUE, this flag overrides the switch. The new process is run in the shared Virtual DOS Machine.
         /// </summary>
-        CREATE_SHARED_WOW_VDM               = 0x00001000,
+        CREATE_SHARED_WOW_VDM = 0x00001000,
 
         /// <summary>
         /// The process inherits its parent's affinity. If the parent process has threads in more than one processor group, the new
         /// process inherits the group-relative affinity of an arbitrary group in use by the parent.
         /// </summary>
-        INHERIT_PARENT_AFFINITY             = 0x00010000,
+        INHERIT_PARENT_AFFINITY = 0x00010000,
 
         /// <summary>
         /// The process is to be run as a protected process. The system restricts access to protected processes and the threads of
@@ -116,24 +116,24 @@ namespace ManagedSandbox.Native
         /// Windows error reporting, and system. Components that load into these binaries must also be signed.Multimedia companies can
         /// leverage the first two protected processes.
         /// </summary>
-        CREATE_PROTECTED_PROCESS            = 0x00040000,
+        CREATE_PROTECTED_PROCESS = 0x00040000,
 
         /// <summary>
         /// The process is created with extended startup information; the lpStartupInfo parameter specifies a STARTUPINFOEX structure.
         /// </summary>
-        EXTENDED_STARTUPINFO_PRESENT        = 0x00080000,
+        EXTENDED_STARTUPINFO_PRESENT = 0x00080000,
 
         /// <summary>
         /// This flag allows secure processes, that run in the Virtualization-Based Security environment, to launch.
         /// </summary>
-        CREATE_SECURE_PROCESS               = 0x00400000,
+        CREATE_SECURE_PROCESS = 0x00400000,
 
         /// <summary>
         /// The child processes of a process associated with a job are not associated with the job.
         /// If the calling process is not associated with a job, this constant has no effect. If the calling process is associated
         /// with a job, the job must set the JOB_OBJECT_LIMIT_BREAKAWAY_OK limit.
         /// </summary>
-        CREATE_BREAKAWAY_FROM_JOB           = 0x01000000,
+        CREATE_BREAKAWAY_FROM_JOB = 0x01000000,
 
         /// <summary>
         /// The new process does not inherit the error mode of the calling process. Instead, the new process gets the default error
@@ -142,7 +142,7 @@ namespace ManagedSandbox.Native
         /// The default behavior is for the new process to inherit the error mode of the caller.Setting this flag changes that default
         /// behavior.
         /// </summary>
-        CREATE_DEFAULT_ERROR_MODE           = 0x04000000,
+        CREATE_DEFAULT_ERROR_MODE = 0x04000000,
 
         /// <summary>
         /// The process is a console application that is being run without a console window. Therefore, the console handle for the
@@ -150,66 +150,66 @@ namespace ManagedSandbox.Native
         /// This flag is ignored if the application is not a console application, or if it is used with either CREATE_NEW_CONSOLE or
         /// DETACHED_PROCESS.
         /// </summary>
-        CREATE_NO_WINDOW                    = 0x08000000,
+        CREATE_NO_WINDOW = 0x08000000,
 
         /// <summary>
         /// Allows the caller to execute a child process that bypasses the process restrictions that would normally be applied
         /// automatically to the process.
         /// </summary>
-        CREATE_PRESERVE_CODE_AUTHZ_LEVEL    = 0x02000000,
+        CREATE_PRESERVE_CODE_AUTHZ_LEVEL = 0x02000000,
     }
 
     [Flags]
     public enum DESKTOP_RIGHTS : UInt32
     {
-        NONE                        = 0x00000000,
+        NONE = 0x00000000,
 
         /// <summary>
         /// Required to read objects on the desktop.
         /// </summary>
-        DESKTOP_READOBJECTS         = 0x00000001,
+        DESKTOP_READOBJECTS = 0x00000001,
 
         /// <summary>
         /// Required to create a window on the desktop.
         /// </summary>
-        DESKTOP_CREATEWINDOW        = 0x00000002,
+        DESKTOP_CREATEWINDOW = 0x00000002,
 
         /// <summary>
         /// Required to create a menu on the desktop.
         /// </summary>
-        DESKTOP_CREATEMENU          = 0x00000004,
+        DESKTOP_CREATEMENU = 0x00000004,
 
         /// <summary>
         /// Required to establish any of the window hooks.
         /// </summary>
-        DESKTOP_HOOKCONTROL         = 0x00000008,
+        DESKTOP_HOOKCONTROL = 0x00000008,
 
         /// <summary>
         /// Required to perform journal recording on a desktop.
         /// </summary>
-        DESKTOP_JOURNALRECORD       = 0x00000010,
+        DESKTOP_JOURNALRECORD = 0x00000010,
 
         /// <summary>
         /// Required to perform journal playback on a desktop.
         /// </summary>
-        DESKTOP_JOURNALPLAYBACK     = 0x00000020,
+        DESKTOP_JOURNALPLAYBACK = 0x00000020,
 
         /// <summary>
         /// Required for the desktop to be enumerated.
         /// </summary>
-        DESKTOP_ENUMERATE           = 0x00000040,
+        DESKTOP_ENUMERATE = 0x00000040,
 
         /// <summary>
         /// Required to write objects on the desktop.
         /// </summary>
-        DESKTOP_WRITEOBJECTS        = 0x00000080,
+        DESKTOP_WRITEOBJECTS = 0x00000080,
 
         /// <summary>
         /// Required to activate the desktop using the SwitchDesktop functio
         /// </summary>
-        DESKTOP_SWITCHDESKTOP       = 0x00000100,
+        DESKTOP_SWITCHDESKTOP = 0x00000100,
 
-        DESKTOP_ALL_ACCESS          = DESKTOP_READOBJECTS |
+        DESKTOP_ALL_ACCESS = DESKTOP_READOBJECTS |
                                       DESKTOP_CREATEWINDOW |
                                       DESKTOP_CREATEMENU |
                                       DESKTOP_HOOKCONTROL |
@@ -219,38 +219,38 @@ namespace ManagedSandbox.Native
                                       DESKTOP_WRITEOBJECTS |
                                       DESKTOP_SWITCHDESKTOP,
 
-        STANDARD_DELETE             = 0x00010000,
-        STANDARD_READPERMISSIONS    = 0x00020000,
-        STANDARD_WRITEPERMISSIONS   = 0x00040000,
-        STANDARD_TAKEOWNERSHIP      = 0x00080000,
-        STANDARD_SYNCHRONIZE        = 0x00100000,
+        STANDARD_DELETE = 0x00010000,
+        STANDARD_READPERMISSIONS = 0x00020000,
+        STANDARD_WRITEPERMISSIONS = 0x00040000,
+        STANDARD_TAKEOWNERSHIP = 0x00080000,
+        STANDARD_SYNCHRONIZE = 0x00100000,
 
-        STANDARD_RIGHTS_ALL         = STANDARD_DELETE |
+        STANDARD_RIGHTS_ALL = STANDARD_DELETE |
                                       STANDARD_READPERMISSIONS |
                                       STANDARD_SYNCHRONIZE |
                                       STANDARD_TAKEOWNERSHIP |
                                       STANDARD_WRITEPERMISSIONS,
-        STANDARD_RIGHTS_EXECUTE     = STANDARD_READPERMISSIONS,
-        STANDARD_RIGHTS_READ        = STANDARD_READPERMISSIONS,
-        STANDARD_RIGHTS_REQUIRED    = STANDARD_DELETE |
+        STANDARD_RIGHTS_EXECUTE = STANDARD_READPERMISSIONS,
+        STANDARD_RIGHTS_READ = STANDARD_READPERMISSIONS,
+        STANDARD_RIGHTS_REQUIRED = STANDARD_DELETE |
                                       STANDARD_READPERMISSIONS |
                                       STANDARD_TAKEOWNERSHIP |
                                       STANDARD_WRITEPERMISSIONS,
-        STANDARD_RIGHTS_WRITE       = STANDARD_READPERMISSIONS,
+        STANDARD_RIGHTS_WRITE = STANDARD_READPERMISSIONS,
 
-        GENERIC_READ                = DESKTOP_ENUMERATE |
+        GENERIC_READ = DESKTOP_ENUMERATE |
                                       DESKTOP_READOBJECTS |
                                       STANDARD_RIGHTS_READ,
-        GENERIC_WRITE               = DESKTOP_CREATEMENU |
+        GENERIC_WRITE = DESKTOP_CREATEMENU |
                                       DESKTOP_CREATEWINDOW |
                                       DESKTOP_HOOKCONTROL |
                                       DESKTOP_JOURNALPLAYBACK |
                                       DESKTOP_JOURNALRECORD |
                                       DESKTOP_WRITEOBJECTS |
                                       STANDARD_RIGHTS_WRITE,
-        GENERIC_EXECUTE             = DESKTOP_SWITCHDESKTOP |
+        GENERIC_EXECUTE = DESKTOP_SWITCHDESKTOP |
                                       STANDARD_RIGHTS_EXECUTE,
-        GENERIC_ALL                 = DESKTOP_CREATEMENU |
+        GENERIC_ALL = DESKTOP_CREATEMENU |
                                       DESKTOP_CREATEWINDOW |
                                       DESKTOP_ENUMERATE |
                                       DESKTOP_HOOKCONTROL |
@@ -264,22 +264,22 @@ namespace ManagedSandbox.Native
 
     public enum Error : UInt32
     {
-        OK                  = 0x00000000,
-        AccessDenied        = 0x00000005,
-        InvalidParameter    = 0x00000057,
-        InsufficientBuffer  = 0x0000007A,
-        AlreadyExists       = 0x000000B7,
+        OK = 0x00000000,
+        AccessDenied = 0x00000005,
+        InvalidParameter = 0x00000057,
+        InsufficientBuffer = 0x0000007A,
+        AlreadyExists = 0x000000B7,
     }
 
     public enum HResult : UInt32
     {
-        OK                  = 0x00000000,
-        AccessDenied        = 0x80070005,
-        InvalidParameter    = 0x80070057,
-        InsufficientBuffer  = 0x8007007A,
-        AlreadyExists       = 0x800700B7,
+        OK = 0x00000000,
+        AccessDenied = 0x80070005,
+        InvalidParameter = 0x80070057,
+        InsufficientBuffer = 0x8007007A,
+        AlreadyExists = 0x800700B7,
 
-        Unknown             = 0xFFFFFFFF,
+        Unknown = 0xFFFFFFFF,
     }
 
     /// <summary>
@@ -290,22 +290,22 @@ namespace ManagedSandbox.Native
         /// <summary>
         /// The lpJobObjectInfo parameter is a pointer to a JOBOBJECT_BASIC_LIMIT_INFORMATION structure.
         /// </summary>
-        JobObjectBasicLimitInformation              = 2,
+        JobObjectBasicLimitInformation = 2,
 
         /// <summary>
         /// The lpJobObjectInfo parameter is a pointer to a JOBOBJECT_BASIC_UI_RESTRICTIONS structure.
         /// </summary>
-        JobObjectBasicUIRestrictions                = 4,
+        JobObjectBasicUIRestrictions = 4,
 
         /// <summary>
         /// This flag is not supported. Applications must set security limitations individually for each process.
         /// </summary>
-        JobObjectSecurityLimitInformation           = 5,
+        JobObjectSecurityLimitInformation = 5,
 
         /// <summary>
         /// The lpJobObjectInfo parameter is a pointer to a JOBOBJECT_END_OF_JOB_TIME_INFORMATION structure.
         /// </summary>
-        JobObjectEndOfJobTimeInformation            = 6,
+        JobObjectEndOfJobTimeInformation = 6,
 
         /// <summary>
         /// The lpJobObjectInfo parameter is a pointer to a JOBOBJECT_ASSOCIATE_COMPLETION_PORT structure.
@@ -315,19 +315,19 @@ namespace ManagedSandbox.Native
         /// <summary>
         /// The lpJobObjectInfo parameter is a pointer to a JOBOBJECT_EXTENDED_LIMIT_INFORMATION structure.
         /// </summary>
-        JobObjectExtendedLimitInformation           = 9,
+        JobObjectExtendedLimitInformation = 9,
 
         /// <summary>
         /// The lpJobObjectInfo parameter is a pointer to a USHORT value that specifies the list of processor groups to assign the
         /// job to. The cbJobObjectInfoLength parameter is set to the size of the group data. Divide this value by sizeof(USHORT)
         /// to determine the number of groups.
         /// </summary>
-        JobObjectGroupInformation                   = 11,
+        JobObjectGroupInformation = 11,
 
         /// <summary>
         /// The lpJobObjectInfo parameter is a pointer to a JOBOBJECT_NOTIFICATION_LIMIT_INFORMATION structure.
         /// </summary>
-        JobObjectNotificationLimitInformation       = 12,
+        JobObjectNotificationLimitInformation = 12,
 
         /// <summary>
         /// The lpJobObjectInfo parameter is a pointer to a buffer that contains an array of GROUP_AFFINITY structures that specify
@@ -335,58 +335,58 @@ namespace ManagedSandbox.Native
         /// parameter is set to the size of the group affinity data. Divide this value by sizeof(GROUP_AFFINITY) to determine the
         /// number of groups.
         /// </summary>
-        JobObjectGroupInformationEx                 = 14,
+        JobObjectGroupInformationEx = 14,
 
         /// <summary>
         /// The lpJobObjectInfo parameter is a pointer to a JOBOBJECT_CPU_RATE_CONTROL_INFORMATION structure.
         /// </summary>
-        JobObjectCpuRateControlInformation          = 15,
+        JobObjectCpuRateControlInformation = 15,
 
         /// <summary>
         /// The lpJobObjectInfo parameter is a pointer to a JOBOBJECT_NET_RATE_CONTROL_INFORMATION structure.
         /// </summary>
-        JobObjectNetRateControlInformation          = 32,
+        JobObjectNetRateControlInformation = 32,
 
         /// <summary>
         /// The lpJobObjectInfo parameter is a pointer to a JOBOBJECT_NOTIFICATION_LIMIT_INFORMATION_2 structure.
         /// </summary>
-        JobObjectNotificationLimitInformation2      = 34,
+        JobObjectNotificationLimitInformation2 = 34,
 
         /// <summary>
         /// The lpJobObjectInfo parameter is a pointer to a JOBOBJECT_LIMIT_VIOLATION_INFORMATION_2 structure.
         /// </summary>
-        JobObjectLimitViolationInformation2         = 35,
+        JobObjectLimitViolationInformation2 = 35,
     }
 
     [Flags]
     public enum JOB_OBJECT_LIMIT_FLAGS : UInt32
     {
-        NONE                                        = 0x00000000,
+        NONE = 0x00000000,
 
         /// <summary>
         /// Causes all processes associated with the job to use the same minimum and maximum working set sizes. The MinimumWorkingSetSize
         /// and MaximumWorkingSetSize members contain additional information.
         /// If the job is nested, the effective working set size is the smallest working set size in the job chain.
         /// </summary>
-        JOB_OBJECT_LIMIT_WORKINGSET                 = 0x00000001,
+        JOB_OBJECT_LIMIT_WORKINGSET = 0x00000001,
 
         /// <summary>
         /// Establishes a user-mode execution time limit for each currently active process and for all future processes associated with
         /// the job. The PerProcessUserTimeLimit member contains additional information.
         /// </summary>
-        JOB_OBJECT_LIMIT_PROCESS_TIME               = 0x00000002,
+        JOB_OBJECT_LIMIT_PROCESS_TIME = 0x00000002,
 
         /// <summary>
         /// Establishes a user-mode execution time limit for the job. The PerJobUserTimeLimit member contains additional information.
         /// This flag cannot be used with JOB_OBJECT_LIMIT_PRESERVE_JOB_TIME.
         /// </summary>
-        JOB_OBJECT_LIMIT_JOB_TIME                   = 0x00000004,
+        JOB_OBJECT_LIMIT_JOB_TIME = 0x00000004,
 
         /// <summary>
         /// Establishes a maximum number of simultaneously active processes associated with the job. The ActiveProcessLimit member
         /// contains additional information.
         /// </summary>
-        JOB_OBJECT_LIMIT_ACTIVE_PROCESS             = 0x00000008,
+        JOB_OBJECT_LIMIT_ACTIVE_PROCESS = 0x00000008,
 
         /// <summary>
         /// Causes all processes associated with the job to use the same processor affinity. The Affinity member contains additional
@@ -395,26 +395,26 @@ namespace ManagedSandbox.Native
         /// the specified affinity a superset of the affinity of the parent job, it is ignored and the affinity of the parent job
         /// is used.
         /// </summary>
-        JOB_OBJECT_LIMIT_AFFINITY                   = 0x00000010,
+        JOB_OBJECT_LIMIT_AFFINITY = 0x00000010,
 
         /// <summary>
         /// Causes all processes associated with the job to use the same priority class. The PriorityClass member contains additional
         /// information.
         /// If the job is nested, the effective priority class is the lowest priority class in the job chain.
         /// </summary>
-        JOB_OBJECT_LIMIT_PRIORITY_CLASS             = 0x00000020,
+        JOB_OBJECT_LIMIT_PRIORITY_CLASS = 0x00000020,
 
         /// <summary>
         /// Preserves any job time limits you previously set. As long as this flag is set, you can establish a per-job time limit once,
         /// then alter other limits in subsequent calls. This flag cannot be used with JOB_OBJECT_LIMIT_JOB_TIME.
         /// </summary>
-        JOB_OBJECT_LIMIT_PRESERVE_JOB_TIME          = 0x00000040,
+        JOB_OBJECT_LIMIT_PRESERVE_JOB_TIME = 0x00000040,
 
         /// <summary>
         /// Causes all processes in the job to use the same scheduling class. The SchedulingClass member contains additional information.
         /// If the job is nested, the effective scheduling class is the lowest scheduling class in the job chain.
         /// </summary>
-        JOB_OBJECT_LIMIT_SCHEDULING_CLASS           = 0x00000080,
+        JOB_OBJECT_LIMIT_SCHEDULING_CLASS = 0x00000080,
 
         /// <summary>
         /// Causes all processes associated with the job to limit their committed memory. When a process attempts to commit memory that
@@ -424,7 +424,7 @@ namespace ManagedSandbox.Native
         /// This limit requires use of a JOBOBJECT_EXTENDED_LIMIT_INFORMATION structure. Its BasicLimitInformation member is a
         /// JOBOBJECT_BASIC_LIMIT_INFORMATION structure.
         /// </summary>
-        JOB_OBJECT_LIMIT_PROCESS_MEMORY             = 0x00000100,
+        JOB_OBJECT_LIMIT_PROCESS_MEMORY = 0x00000100,
 
         /// <summary>
         /// Causes all processes associated with the job to limit the job-wide sum of their committed memory. When a process attempts
@@ -433,7 +433,7 @@ namespace ManagedSandbox.Native
         /// This limit requires use of a JOBOBJECT_EXTENDED_LIMIT_INFORMATION structure. Its BasicLimitInformation member is a
         /// JOBOBJECT_BASIC_LIMIT_INFORMATION structure.
         /// </summary>
-        JOB_OBJECT_LIMIT_JOB_MEMORY                 = 0x00000200,
+        JOB_OBJECT_LIMIT_JOB_MEMORY = 0x00000200,
 
         /// <summary>
         /// Forces a call to the SetErrorMode function with the SEM_NOGPFAULTERRORBOX flag for each process associated with the job.
@@ -451,7 +451,7 @@ namespace ManagedSandbox.Native
         /// This limit requires use of a JOBOBJECT_EXTENDED_LIMIT_INFORMATION structure. Its BasicLimitInformation member is a
         /// JOBOBJECT_BASIC_LIMIT_INFORMATION structure.
         /// </summary>
-        JOB_OBJECT_LIMIT_BREAKAWAY_OK               = 0x00000800,
+        JOB_OBJECT_LIMIT_BREAKAWAY_OK = 0x00000800,
 
         /// <summary>
         /// Allows any process associated with the job to create child processes that are not associated with the job.
@@ -462,42 +462,42 @@ namespace ManagedSandbox.Native
         /// This limit requires use of a JOBOBJECT_EXTENDED_LIMIT_INFORMATION structure. Its BasicLimitInformation member is a
         /// JOBOBJECT_BASIC_LIMIT_INFORMATION structure.
         /// </summary>
-        JOB_OBJECT_LIMIT_SILENT_BREAKAWAY_OK        = 0x00001000,
+        JOB_OBJECT_LIMIT_SILENT_BREAKAWAY_OK = 0x00001000,
 
         /// <summary>
         /// Causes all processes associated with the job to terminate when the last handle to the job is closed.
         /// This limit requires use of a JOBOBJECT_EXTENDED_LIMIT_INFORMATION structure. Its BasicLimitInformation member is a
         /// JOBOBJECT_BASIC_LIMIT_INFORMATION structure.
         /// </summary>
-        JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE          = 0x00002000,
+        JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE = 0x00002000,
 
         /// <summary>
         /// Allows processes to use a subset of the processor affinity for all processes associated with the job. This value
         /// must be combined with JOB_OBJECT_LIMIT_AFFINITY.
         /// </summary>
-        JOB_OBJECT_LIMIT_SUBSET_AFFINITY            = 0x00004000,
+        JOB_OBJECT_LIMIT_SUBSET_AFFINITY = 0x00004000,
     }
 
     [Flags]
     public enum JOB_OBJECT_UILIMIT_FLAGS : UInt32
     {
-        NONE                                = 0x00000000,
-        ALL                                 = 0x000000FF,
+        NONE = 0x00000000,
+        ALL = 0x000000FF,
 
         /// <summary>
         /// Prevents processes associated with the job from using USER handles owned by processes not associated with the same job.
         /// </summary>
-        JOB_OBJECT_UILIMIT_HANDLES          = 0x00000001,
+        JOB_OBJECT_UILIMIT_HANDLES = 0x00000001,
 
         /// <summary>
         /// Prevents processes associated with the job from reading data from the clipboard.
         /// </summary>
-        JOB_OBJECT_UILIMIT_READCLIPBOARD    = 0x00000002,
+        JOB_OBJECT_UILIMIT_READCLIPBOARD = 0x00000002,
 
         /// <summary>
         /// Prevents processes associated with the job from writing data to the clipboard.
         /// </summary>
-        JOB_OBJECT_UILIMIT_WRITECLIPBOARD   = 0x00000004,
+        JOB_OBJECT_UILIMIT_WRITECLIPBOARD = 0x00000004,
 
         /// <summary>
         /// Prevents processes associated with the job from changing system parameters by using the SystemParametersInfo function.
@@ -507,30 +507,50 @@ namespace ManagedSandbox.Native
         /// <summary>
         /// Prevents processes associated with the job from calling the ChangeDisplaySettings function.
         /// </summary>
-        JOB_OBJECT_UILIMIT_DISPLAYSETTINGS  = 0x00000010,
+        JOB_OBJECT_UILIMIT_DISPLAYSETTINGS = 0x00000010,
 
         /// <summary>
         /// Prevents processes associated with the job from accessing global atoms. When this flag is used, each job has its own atom table.
         /// </summary>
-        JOB_OBJECT_UILIMIT_GLOBALATOMS      = 0x00000020,
+        JOB_OBJECT_UILIMIT_GLOBALATOMS = 0x00000020,
 
         /// <summary>
         /// Prevents processes associated with the job from creating desktops and switching desktops using the CreateDesktop and
         /// SwitchDesktop functions.
         /// </summary>
-        JOB_OBJECT_UILIMIT_DESKTOP          = 0x00000040,
+        JOB_OBJECT_UILIMIT_DESKTOP = 0x00000040,
 
         /// <summary>
         /// Prevents processes associated with the job from calling the ExitWindows or ExitWindowsEx function.
         /// </summary>
-        JOB_OBJECT_UILIMIT_EXITWINDOWS      = 0x00000080,
+        JOB_OBJECT_UILIMIT_EXITWINDOWS = 0x00000080,
     }
 
     public enum PROC_THREAD_ATTRIBUTES : UInt32
     {
-        PROC_THREAD_ATTRIBUTE_PARENT_PROCESS        = 0x00020000,
-        PROC_THREAD_ATTRIBUTE_HANDLE_LIST           = 0x00020002,
+        PROC_THREAD_ATTRIBUTE_PARENT_PROCESS = 0x00020000,
+        PROC_THREAD_ATTRIBUTE_HANDLE_LIST = 0x00020002,
         PROC_THREAD_ATTRIBUTE_SECURITY_CAPABILITIES = 0x00020009,
+    }
+
+    [Flags]
+    public enum RESTRICTED_TOKEN_FLAGS : UInt32
+    {
+        NONE                    = 0x00000000,
+        DISABLE_MAX_PRIVILEGE   = 0x00000001,
+        SANDBOX_INERT           = 0x00000002,
+        LUA_TOKEN               = 0x00000004,
+        WRITE_RESTRICTED        = 0x00000008,
+    }
+
+    [Flags]
+    public enum SECURITY_MANDATOR_RID : UInt32
+    {
+        UNTRUSTED   = 0x00000000,
+        LOW         = 0x00001000,
+        MEDIUM      = 0x00002000,
+        HIGH        = 0x00003000,
+        SYSTEM      = 0x00004000,
     }
 
     [Flags]

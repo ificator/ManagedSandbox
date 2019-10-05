@@ -154,7 +154,7 @@ namespace ManagedSandbox.Native
     /// Contains basic user-interface restrictions for a job object.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct JOBOBJECT_BASIC_UI_RESTRICTIONS
+    public struct JOBOBJECT_BASIC_UI_RESTRICTIONS
     {
         /// <summary>
         /// The restriction class for the user interface.
@@ -200,6 +200,27 @@ namespace ManagedSandbox.Native
         /// The peak memory usage of all processes currently associated with the job.
         /// </summary>
         public UIntPtr PeakJobMemoryUsed;
+    }
+
+    /// <summary>
+    /// An LUID is a 64-bit value guaranteed to be unique only on the system on which it was generated. The uniqueness of a locally
+    /// unique identifier (LUID) is guaranteed only until the system is restarted.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct LUID
+    {
+        public UInt32 LowPart;
+        public Int32 HighPart;
+    }
+
+    /// <summary>
+    /// The LUID_AND_ATTRIBUTES structure represents a locally unique identifier (LUID) and its attributes.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct LUID_AND_ATTRIBUTES
+    {
+        public LUID Luid;
+        public UInt32 Attributes;
     }
 
     /// <summary>
@@ -266,6 +287,16 @@ namespace ManagedSandbox.Native
         /// Contains up to 32 one-bit flags. The meaning depends on the definition and use of the SID.
         /// </summary>
         public SID_ATTRIBUTES Attributes;
+    }
+
+    /// <summary>
+    /// The SID_IDENTIFIER_AUTHORITY structure represents the top-level authority of a security identifier (SID).
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct SID_IDENTIFIER_AUTHORITY
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6, ArraySubType = UnmanagedType.I1)]
+        public byte[] Value;
     }
 
     /// <summary>
@@ -424,6 +455,24 @@ namespace ManagedSandbox.Native
         {
             this.StartupInfo.cb = Marshal.SizeOf(typeof(STARTUPINFOEX));
         }
+    }
+
+    /// <summary>
+    /// The TOKEN_DEFAULT_DACL structure specifies a discretionary access control list (DACL).
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct TOKEN_DEFAULT_DACL
+    {
+        public IntPtr DefaultDacl;
+    };
+
+    /// <summary>
+    /// The structure specifies the mandatory integrity level for a token.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct TOKEN_MANDATORY_LABEL
+    {
+        public SID_AND_ATTRIBUTES Label;
     }
 
     /// <summary>

@@ -30,6 +30,65 @@ namespace ManagedSandbox.Native
     public static class Methods
     {
         /// <summary>
+        /// The AllocateAndInitializeSid function allocates and initializes a 
+        /// security identifier (SID) with up to eight subauthorities.
+        /// </summary>
+        /// <param name="pIdentifierAuthority">
+        /// A reference of a SID_IDENTIFIER_AUTHORITY structure. This 
+        /// structure provides the top-level identifier authority value to 
+        /// set in the SID.
+        /// </param>
+        /// <param name="nSubAuthorityCount">
+        /// Specifies the number of subauthorities to place in the SID. 
+        /// </param>
+        /// <param name="dwSubAuthority0">
+        /// Subauthority value to place in the SID.
+        /// </param>
+        /// <param name="dwSubAuthority1">
+        /// Subauthority value to place in the SID.
+        /// </param>
+        /// <param name="dwSubAuthority2">
+        /// Subauthority value to place in the SID.
+        /// </param>
+        /// <param name="dwSubAuthority3">
+        /// Subauthority value to place in the SID.
+        /// </param>
+        /// <param name="dwSubAuthority4">
+        /// Subauthority value to place in the SID.
+        /// </param>
+        /// <param name="dwSubAuthority5">
+        /// Subauthority value to place in the SID.
+        /// </param>
+        /// <param name="dwSubAuthority6">
+        /// Subauthority value to place in the SID.
+        /// </param>
+        /// <param name="dwSubAuthority7">
+        /// Subauthority value to place in the SID.
+        /// </param>
+        /// <param name="pSid">
+        /// Outputs the allocated and initialized SID structure.
+        /// </param>
+        /// <returns>
+        /// If the function succeeds, the return value is true.
+        /// 
+        /// If the function fails, the return value is false. To get extended error information, call GetLastError.
+        /// </returns>
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool AllocateAndInitializeSid(
+            ref SID_IDENTIFIER_AUTHORITY pIdentifierAuthority,
+            byte nSubAuthorityCount,
+            int dwSubAuthority0,
+            int dwSubAuthority1,
+            int dwSubAuthority2,
+            int dwSubAuthority3,
+            int dwSubAuthority4,
+            int dwSubAuthority5,
+            int dwSubAuthority6,
+            int dwSubAuthority7,
+            out SafeSecurityIdentifier pSid);
+
+        /// <summary>
         /// Assigns a process to an existing job object.
         /// </summary>
         /// <param name="hJob">
@@ -261,6 +320,67 @@ namespace ManagedSandbox.Native
             out PROCESS_INFORMATION processInformation);
 
         /// <summary>
+        /// The CreateRestrictedToken function creates a new access token that is a restricted version of an existing access token. The
+        /// restricted token can have disabled security identifiers (SIDs), deleted privileges, and a list of restricting SIDs. For
+        /// more information, see Restricted Tokens.
+        /// </summary>
+        /// <param name="hExistingToken">
+        /// A handle to a primary or impersonation token. The token can also be a restricted token. The handle must have
+        /// TOKEN_DUPLICATE access to the token.
+        /// </param>
+        /// <param name="flags">
+        /// Specifies additional privilege options.
+        /// </param>
+        /// <param name="disableSidCount">
+        /// Specifies the number of entries in the SidsToDisable array.
+        /// </param>
+        /// <param name="sidsToDisable">
+        /// A pointer to an array of SID_AND_ATTRIBUTES structures that specify the deny-only SIDs in the restricted token. The system
+        /// uses a deny-only SID to deny access to a securable object. The absence of a deny-only SID does not allow access.
+        /// </param>
+        /// <param name="deletePrivilegeCount">
+        /// Specifies the number of entries in the PrivilegesToDelete array.
+        /// </param>
+        /// <param name="privilegesToDelete">
+        /// A pointer to an array of LUID_AND_ATTRIBUTES structures that specify the privileges to delete in the restricted token.
+        /// </param>
+        /// <param name="restrictedSidCount">
+        /// Specifies the number of entries in the SidsToRestrict array.
+        /// </param>
+        /// <param name="sidsToRestrict">
+        /// A pointer to an array of SID_AND_ATTRIBUTES structures that specify a list of restricting SIDs for the new token. If the
+        /// existing token is a restricted token, the list of restricting SIDs for the new token is the intersection of this array and
+        /// the list of restricting SIDs for the existing token. No check is performed to remove duplicate SIDs that were placed on the
+        /// SidsToRestrict parameter. Duplicate SIDs allow a restricted token to have redundant information in the restricting SID
+        /// list.
+        /// </param>
+        /// <param name="hNewToken">
+        /// A pointer to a variable that receives a handle to the new restricted token. This handle has the same access rights as
+        /// ExistingTokenHandle. The new token is the same type, primary or impersonation, as the existing token. The handle returned
+        /// in NewTokenHandle can be duplicated.
+        /// </param>
+        /// <returns>
+        /// If the function succeeds, the return value is nonzero.
+        /// 
+        /// If the function fails, the return value is zero. To get extended error information, call GetLastError.
+        /// </returns>
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool CreateRestrictedToken(
+            SafeTokenHandle hExistingToken,
+            RESTRICTED_TOKEN_FLAGS flags,
+            UInt32 disableSidCount,
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
+            SID_AND_ATTRIBUTES[] sidsToDisable,
+            UInt32 deletePrivilegeCount,
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 4)]
+            LUID_AND_ATTRIBUTES[] privilegesToDelete,
+            UInt32 restrictedSidCount,
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 6)]
+            SID_AND_ATTRIBUTES[] sidsToRestrict,
+            out SafeTokenHandle hNewToken);
+
+        /// <summary>
         /// Creates a SID for predefined aliases.
         /// </summary>
         /// <param name="wellKnownSidType">
@@ -405,6 +525,20 @@ namespace ManagedSandbox.Native
         public static extern int GetCurrentThreadId();
 
         /// <summary>
+        /// The function returns the length, in bytes, of a valid security 
+        /// identifier (SID).
+        /// </summary>
+        /// <param name="pSID">
+        /// A pointer to the SID structure whose length is returned. 
+        /// </param>
+        /// <returns>
+        /// If the SID structure is valid, the return value is the length, in 
+        /// bytes, of the SID structure.
+        /// </returns>
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern int GetLengthSid(IntPtr pSID);
+
+        /// <summary>
         /// The function retrieves a specified type of information about an access token. The calling process must have appropriate
         /// access rights to obtain the information.
         /// </summary>
@@ -544,6 +678,35 @@ namespace ManagedSandbox.Native
         /// </returns>
         [DllImport("user32.dll", SetLastError = true)]
         public static extern bool SetThreadDesktop(IntPtr hDesktop);
+
+        /// <summary>
+        /// The function sets various types of information for a specified access token. The information that this function sets
+        /// replaces existing information. The calling process must have appropriate access rights to set the information.
+        /// </summary>
+        /// <param name="hToken">
+        /// A handle to the access token for which information is to be set.
+        /// </param>
+        /// <param name="tokenInfoClass">
+        /// A value from the TOKEN_INFORMATION_CLASS enumerated type that identifies the type of information the function sets.
+        /// </param>
+        /// <param name="pTokenInfo">
+        /// A pointer to a buffer that contains the information set in the access token.
+        /// </param>
+        /// <param name="tokenInfoLength">
+        /// Specifies the length, in bytes, of the buffer pointed to by TokenInformation.
+        /// </param>
+        /// <returns>
+        /// If the function succeeds, the return value is the thread's previous suspend count.
+        /// 
+        /// If the function fails, the return value is (DWORD) -1. To get extended error information, call GetLastError.
+        /// </returns>
+        [DllImport("advapi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SetTokenInformation(
+            SafeTokenHandle hToken,
+            TOKEN_INFORMATION_CLASS tokenInfoClass,
+            IntPtr pTokenInfo,
+            Int32 tokenInfoLength);
 
         /// <summary>
         /// Updates the specified attribute in a list of attributes for process and thread creation.

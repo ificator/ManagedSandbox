@@ -22,6 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <LangVersion>latest</LangVersion>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -52,6 +53,7 @@
     <Compile Include="Desktop\DesktopProtection.cs" />
     <Compile Include="Desktop\DesktopSecurity.cs" />
     <Compile Include="DisposalEscrow.cs" />
+    <Compile Include="RestrictedToken\RestrictedProcessProtection.cs" />
     <Compile Include="Security\IPrincipalProvider.cs" />
     <Compile Include="IProtection.cs" />
     <Compile Include="JobObject\JobObject.cs" />
@@ -71,16 +73,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SandboxedProcess.cs" />
     <Compile Include="SandboxException.cs" />
-    <Compile Include="Security\ISecurityIdentifierProvider.cs" />
-    <Compile Include="Security\SecurityIdentifierProvider.cs" />
+    <Compile Include="Security\IIdentityProvider.cs" />
+    <Compile Include="Security\IdentityProvider.cs" />
     <Compile Include="Tracing\ConsoleTracer.cs" />
     <Compile Include="Tracing\FileTracer.cs" />
     <Compile Include="Tracing\ITracer.cs" />
     <Compile Include="Tracing\NullTracer.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="RestrictedToken\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

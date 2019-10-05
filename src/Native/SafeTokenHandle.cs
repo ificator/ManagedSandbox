@@ -36,6 +36,14 @@ namespace ManagedSandbox.Native
             this.SetHandle(handle);
         }
 
+        /// <summary>
+        /// Without this we are unable to provide an instance of this type to a PInvoked native method, and the world ends.
+        /// </summary>
+        private SafeTokenHandle()
+            : base(true /* ownsHandle */)
+        {
+        }
+
         protected override bool ReleaseHandle()
         {
             return Methods.CloseHandle(this.handle);

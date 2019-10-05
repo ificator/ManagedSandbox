@@ -25,6 +25,7 @@
 using ManagedSandbox.AppContainer;
 using ManagedSandbox.Desktop;
 using ManagedSandbox.JobObject;
+using ManagedSandbox.RestrictedToken;
 using ManagedSandbox.Security;
 using ManagedSandbox.Tracing;
 using Microsoft.Extensions.DependencyInjection;
@@ -90,8 +91,20 @@ namespace ManagedSandbox
         public static IServiceCollection AddManagedSandbox(this IServiceCollection services)
         {
             services.AddTransient<SandboxedProcess>();
-            services.AddSingleton<ISecurityIdentifierProvider, SecurityIdentifierProvider>();
+            services.AddSingleton<IIdentityProvider, IdentityProvider>();
             services.AddSingleton<ITracer, NullTracer>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddRestrictedTokenProtection(this IServiceCollection services)
+        {
+            // Register the actual instance.
+            services.AddSingleton<RestrictedProcessProtection>();
+
+            // Register the implemented interfaces.
+            services.AddSingleton<IPrincipalProvider, RestrictedProcessProtection>(x => x.GetService<RestrictedProcessProtection>());
+            services.AddSingleton<IProtection, RestrictedProcessProtection>(x => x.GetService<RestrictedProcessProtection>());
 
             return services;
         }
